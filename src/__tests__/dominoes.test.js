@@ -75,21 +75,22 @@ describe('Dominoes', () => {
       true
     );
   });
+  describe('disconnected - simple', () => {
+    runTest(
+      [
+        [1, 1],
+        [2, 2],
+      ],
+      false
+    );
+  });
+  // THESE THREE
   describe("can't be chained", () => {
     runTest(
       [
         [1, 2],
         [4, 1],
         [2, 3],
-      ],
-      false
-    );
-  });
-  describe('disconnected - simple', () => {
-    runTest(
-      [
-        [1, 1],
-        [2, 2],
       ],
       false
     );

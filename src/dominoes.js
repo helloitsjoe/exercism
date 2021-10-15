@@ -5,18 +5,17 @@ const chain = input => {
   const stones = [...input];
 
   // Initialize output array
-  const maybeLoop = [stones.shift()];
+  const maybeChain = [stones.shift()];
 
   while (stones.length) {
-    const loopEnd = right(last(maybeLoop));
+    const chainEnd = right(last(maybeChain));
 
     let index = -1;
     let flip = false;
 
-    // Prioritize doubles
-    // Not exactly sure why this is necessary
+    // Prioritize doubles, this is a little hacky but solves `separate loops`
     const double = stones.find(([l, r], i) => {
-      if (l === loopEnd && r === loopEnd) {
+      if (l === chainEnd && r === chainEnd) {
         index = i;
         return true;
       }
@@ -25,43 +24,38 @@ const chain = input => {
     const nextLink =
       double ||
       stones.find(([l, r], i) => {
-        if (l === loopEnd || r === loopEnd) {
-          flip = r === loopEnd;
+        if (l === chainEnd || r === chainEnd) {
+          flip = r === chainEnd;
           index = i;
           return true;
         }
       });
 
-    console.log(`stones:`, stones);
-    console.log(`maybeLoop:`, maybeLoop);
-    console.log(`nextLink:`, nextLink);
-    console.log(`index:`, index);
+    if (!nextLink) return null;
 
-    if (!nextLink && stones.length) return null;
-
-    maybeLoop.push(flip ? nextLink.reverse() : nextLink);
+    maybeChain.push(flip ? nextLink.reverse() : nextLink);
     stones.splice(index, 1);
 
     // If we have a loop but there are more stones, look for a place where they fit
-    if (isLoop(maybeLoop) && stones.length) {
+    if (isLoop(maybeChain) && stones.length) {
       const firstStone = stones.shift();
-      const inserted = rotateAndInsert(maybeLoop, firstStone);
+      const inserted = rotateAndInsert(maybeChain, firstStone);
 
       // If first stone can't be inserted, move it to the end
       if (!inserted) stones.push(firstStone);
     }
   }
 
-  if (!isLoop(maybeLoop)) return null;
+  if (!isLoop(maybeChain)) return null;
 
-  return maybeLoop;
+  return maybeChain;
 };
 
 function rotateAndInsert(loop, testStone) {
-  let turns = 0;
-  while (turns++ < loop.length) {
+  for (let i = 0; i < loop.length; i++) {
     // rotate through loop checking testStone against each domino
     loop.unshift(loop.pop());
+
     if (right(last(loop)) === left(testStone)) {
       loop.push(testStone);
       return true;
