@@ -1,122 +1,83 @@
-//
-// This is only a SKELETON file for the 'Dominoes' exercise. It's been provided as a
-// convenience to get you started writing code faster.
-//
+const chain = input => {
+  if (!input || !input.length) return input;
 
-const nine = [
-  [1, 2],
-  [5, 3],
-  [3, 1],
-  [1, 2],
-  [2, 4],
-  [1, 6],
-  [2, 3],
-  [3, 4],
-  [5, 6],
-].toString();
-
-export const chain = (input) => {
-  const log = (...args) => {
-    if (input.toString() !== nine.toString()) {
-      return;
-    }
-    console.log(...args);
-  }
-  
-  if (!input) return null;
-  
+  // Create a copy because tests mutate
   const stones = [...input];
-  if (!stones.length) return stones;
-  if (stones.length === 1) {
-    const [[left, right]] = stones;
-    if (left === right) return stones;
-    return null;
-  }
-  
-  const activeLoop = [stones.shift()];
 
-  // let loops = [ordered];
-  
+  // Initialize output array
+  const maybeLoop = [stones.shift()];
+
   while (stones.length) {
-    // const activeLoop = loops[loops.length - 1];
-    const [left, right] = lastOf(activeLoop);
-    
+    const loopEnd = right(last(maybeLoop));
+
     let index = -1;
     let flip = false;
 
     // Prioritize doubles
+    // Not exactly sure why this is necessary
     const double = stones.find(([l, r], i) => {
-      if (l === right && r === right) {
-        index = i;
-        return true;
-      }
-    });
-    
-    const match = double || stones.find(([l, r], i) => {
-      if (l === right || r === right) {
-        flip = r === right;
+      if (l === loopEnd && r === loopEnd) {
         index = i;
         return true;
       }
     });
 
-      log('nine', nine);
-      log('active', activeLoop.toString());
-      log('stones', stones);
-      log('match', match)
-    
-    if (!match) return null
-    if (!stones.length) break;
-    
-    // if (typeof next === 'undefined') break;
-    
-    if (flip) match.reverse();
-    activeLoop.push(match);
+    const nextLink =
+      double ||
+      stones.find(([l, r], i) => {
+        if (l === loopEnd || r === loopEnd) {
+          flip = r === loopEnd;
+          index = i;
+          return true;
+        }
+      });
+
+    console.log(`stones:`, stones);
+    console.log(`maybeLoop:`, maybeLoop);
+    console.log(`nextLink:`, nextLink);
+    console.log(`index:`, index);
+
+    if (!nextLink && stones.length) return null;
+
+    maybeLoop.push(flip ? nextLink.reverse() : nextLink);
     stones.splice(index, 1);
 
-    if (match[1] === activeLoop[0][0] && stones.length) {
-      const inserted = rotateAndInsert(activeLoop, stones.shift())
-      log('inserted', inserted)
-      log('activeLoop', activeLoop.toString())
-      if (!inserted) return null;
-      // closedEarly = false;
+    // If we have a loop but there are more stones, look for a place where they fit
+    if (isLoop(maybeLoop) && stones.length) {
+      const firstStone = stones.shift();
+      const inserted = rotateAndInsert(maybeLoop, firstStone);
+
+      // If first stone can't be inserted, move it to the end
+      if (!inserted) stones.push(firstStone);
     }
   }
 
-  // let merged = loops.flat()
+  if (!isLoop(maybeLoop)) return null;
 
-  // if (merged.length) return merged;
-
-  // return null;
-  return activeLoop;
+  return maybeLoop;
 };
 
-function rotateAndInsert(loop, test) {
-  // rotate through loop seeing if each stoneR matches testL
-  let turns = loop.length
-  while (turns >= 0) {
+function rotateAndInsert(loop, testStone) {
+  let turns = 0;
+  while (turns++ < loop.length) {
+    // rotate through loop checking testStone against each domino
     loop.unshift(loop.pop());
-    if (lastOf(loop)[1] === test[0]) {
-      loop.push(test);
+    if (right(last(loop)) === left(testStone)) {
+      loop.push(testStone);
       return true;
     }
-    turns--
   }
+
+  // Checked entire loop, no match
   return false;
 }
 
-const lastOf = arr => arr[arr.length - 1];
+const last = arr => arr[arr.length - 1];
+const left = arr => arr[0];
+const right = arr => arr[1];
 
-  // const mergeLoops = (loop1, loop2) => {
-  //   for (const [loopL, loopR] of loop2) {
-  //     const injectIndex = loop1.findIndex(([l, r]) => r === loopL)
-  //     if (injectIndex > -1) {
-  //       loop1.splice(injectIndex + 1, 0, ...loop2);
-  //       // loops.splice(i, 1)
-  //       return loop1;
-  //     };
-      
-  //     // Loops don't connect
-  //     return null;
-  //   }
-  // }
+const isLoop = arr => arr[0][0] === arr[arr.length - 1][1];
+
+module.exports = {
+  chain,
+};
