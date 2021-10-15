@@ -1,39 +1,19 @@
 const chain = input => {
   if (!input || !input.length) return input;
 
-  // Create a copy because tests mutate
+  // Create a copy because tests mutate.
+  // If tests do it, so can I! Gonna be a whole lot of mutation coming...
   const stones = [...input];
 
   // Initialize output array
   const maybeChain = [stones.shift()];
 
   while (stones.length) {
-    const chainEnd = right(last(maybeChain));
-
-    let index = -1;
-    let flip = false;
-
-    // Prioritize doubles, this is a little hacky but solves `separate loops`
-    const double = stones.find(([l, r], i) => {
-      if (l === chainEnd && r === chainEnd) {
-        index = i;
-        return true;
-      }
-    });
-
-    const nextLink =
-      double ||
-      stones.find(([l, r], i) => {
-        if (l === chainEnd || r === chainEnd) {
-          flip = r === chainEnd;
-          index = i;
-          return true;
-        }
-      });
+    const { index, nextLink } = testNextStone(maybeChain, stones);
 
     if (!nextLink) return null;
 
-    maybeChain.push(flip ? nextLink.reverse() : nextLink);
+    maybeChain.push(nextLink);
     stones.splice(index, 1);
 
     // If we have a loop but there are more stones, look for a place where they fit
@@ -50,6 +30,35 @@ const chain = input => {
 
   return maybeChain;
 };
+
+// ==== functions ====
+
+function testNextStone(maybeChain, stones) {
+  const chainEnd = right(last(maybeChain));
+
+  let index = -1;
+  let flip = false;
+
+  // Prioritize doubles, (this is a little hacky)
+  const double = stones.find(([l, r], i) => {
+    if (l === chainEnd && r === chainEnd) {
+      index = i;
+      return true;
+    }
+  });
+
+  const nextLink =
+    double ||
+    stones.find(([l, r], i) => {
+      if (l === chainEnd || r === chainEnd) {
+        flip = r === chainEnd;
+        index = i;
+        return true;
+      }
+    });
+
+  return { index, nextLink: flip ? nextLink.reverse() : nextLink };
+}
 
 function rotateAndInsert(loop, testStone) {
   for (let i = 0; i < loop.length; i++) {
