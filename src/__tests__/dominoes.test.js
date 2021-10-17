@@ -84,7 +84,6 @@ describe('Dominoes', () => {
       false
     );
   });
-  // THESE THREE
   describe("can't be chained", () => {
     runTest(
       [
