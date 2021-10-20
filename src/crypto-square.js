@@ -9,20 +9,16 @@ class Crypto {
     const c = r * r >= cleaned.length ? r : r + 1;
     const padded = cleaned.padEnd(r * c);
 
-    const square = [...Array(r)].map((_, i) => padded.slice(i * c, i * c + c));
+    const block = [...Array(r)].map((_, i) => padded.slice(i * c, i * c + c));
+    const encrypted = Array(c).fill([]);
 
-    let encrypted = [];
-
-    for (let r = 0; r < square.length; r++) {
-      for (let c = 0; c < square[r].length; c++) {
-        if (!square[c]) square.push([]);
-        if (!encrypted[c]) encrypted.push([]);
-
-        [encrypted[r][c], encrypted[c][r]] = [square[c][r], square[r][c]];
+    for (const row of block) {
+      for (const [i, letter] of Object.entries(row)) {
+        encrypted[i] += letter;
       }
     }
 
-    return encrypted.map(arr => arr.join('')).join(' ');
+    return encrypted.join(' ');
   }
 }
 
