@@ -5,9 +5,9 @@ const score = (dice, category) => {
     return map;
   }, new Map());
 
+  const groups = groupMap.size;
   const sorted = [...dice].sort();
   const entries = [...groupMap];
-  const groups = groupMap.size;
   const anyLoneDice = entries.some(([k, v]) => k === v);
 
   const calculateFullHouse = () => groups === 2 && !anyLoneDice && sum(dice);
