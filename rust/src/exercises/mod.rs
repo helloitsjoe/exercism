@@ -1,3 +1,4 @@
+pub mod buffer;
 pub mod gigasecond;
 pub mod lasagna;
 pub mod magazine;
