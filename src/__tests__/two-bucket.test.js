@@ -1,4 +1,12 @@
-const { TwoBucket } = require('../two-bucket');
+const { TwoBucket, transfer } = require('../two-bucket');
+describe('transfer', () => {
+  it('transfer', () => {
+    expect(transfer(1, 0, 1)).toEqual([0, 1]);
+    expect(transfer(1, 0, 2)).toEqual([0, 1]);
+    expect(transfer(2, 0, 2)).toEqual([0, 2]);
+    expect(transfer(2, 0, 1)).toEqual([1, 1]);
+  });
+});
 describe('TwoBucket', () => {
   describe('Measure using bucket one of size 3 and bucket two of size 5', () => {
     const buckOne = 3;

@@ -1,57 +1,78 @@
+const LEFT = 'one';
+const RIGHT = 'two';
+
+const transfer = (from, to, toCapacity) => {
+  if (from === 0 || to === toCapacity) return [from, to];
+  return transfer(from - 1, to + 1, toCapacity);
+};
+
+const compute = (
+  leftCapacity,
+  rightCapacity,
+  goal,
+  start,
+  tuple,
+  moves = 1,
+  seen = {}
+) => {
+  let [leftAmount, rightAmount] = tuple;
+  if (leftAmount === goal || rightAmount === goal) return { tuple, moves };
+
+  const newTuple = (() => {
+    if (leftAmount === leftCapacity)
+      return transfer(leftAmount, rightAmount, rightCapacity);
+    if (!leftAmount) return [leftCapacity, rightAmount];
+    if (rightAmount === rightCapacity) return [leftAmount, 0];
+    if (!rightAmount) return transfer(leftAmount, rightAmount, rightCapacity);
+  })();
+
+  const seenKey = newTuple.toString();
+  if (seen[seenKey]) return { tuple: [], moves: -1 };
+
+  return compute(
+    leftCapacity,
+    rightCapacity,
+    goal,
+    start,
+    newTuple,
+    moves + 1,
+    { ...seen, [seenKey]: true }
+  );
+};
+
 class TwoBucket {
-  constructor(left, right, goal, start) {
-    this.left = left;
-    this.right = right;
+  constructor(leftCapacity, rightCapacity, goal, start) {
+    this.leftCapacity = leftCapacity;
+    this.rightCapacity = rightCapacity;
     this.goal = goal;
     this.start = start;
-    this._moves = 1;
-    const tuple = start === 'one' ? [left, 0] : [0, right];
-    this.tuple = this.compute(left, right, goal, tuple);
-  }
-
-  compute(left, right, goal, tuple) {
-    let [leftAmount, rightAmount] = tuple;
-    console.log(`leftAmount, rightAmount:`, leftAmount, rightAmount);
-    if (leftAmount === goal || rightAmount === goal) return tuple;
-
-    // Break
-    if (this._moves > 20) return;
-    this._moves++;
-    if (leftAmount === 0 && rightAmount > 0) {
-      while (leftAmount < left && rightAmount > 0) {
-        leftAmount++;
-        rightAmount--;
-      }
-    } else if (rightAmount === 0 && leftAmount > 0) {
-      while (rightAmount < right && leftAmount > 0) {
-        leftAmount--;
-        rightAmount++;
-      }
-    }
-    return this.compute(left, right, goal, [leftAmount, rightAmount]);
+    const startTuple = start === LEFT ? [leftCapacity, 0] : [rightCapacity, 0];
+    const leftBucket = start === LEFT ? leftCapacity : rightCapacity;
+    const rightBucket = start === LEFT ? rightCapacity : leftCapacity;
+    const { tuple, moves } = compute(
+      leftBucket,
+      rightBucket,
+      goal,
+      start,
+      startTuple
+    );
+    this._moves = moves;
+    this.tuple = start === LEFT ? tuple : tuple.reverse();
   }
 
   moves() {
-    if (this.goal > this.left && this.goal > this.right) {
-      throw new Error('Impossible!');
-    }
+    if (this._moves < 0) throw new Error('Impossible!');
     return this._moves;
   }
 
   get goalBucket() {
-    if (this.goal > this.left) return 'two';
-    if (this.goal > this.right) return 'one';
-
-    return this.goal === this.left ? 'one' : 'two';
+    const buckets = [LEFT, RIGHT];
+    return buckets[this.tuple.indexOf(this.goal)];
   }
 
   get otherBucket() {
-    const [leftAmount, rightAmount] = this.tuple;
-    if (this.goal > this.left) return rightAmount;
-    if (this.goal > this.right) return leftAmount;
-
-    return 0;
+    return this.tuple.find(amount => amount !== this.goal);
   }
 }
 
-module.exports = { TwoBucket };
+module.exports = { TwoBucket, transfer };
