@@ -4,8 +4,10 @@ const bucketNames = [LEFT, RIGHT];
 
 class TwoBucket {
   constructor(left, right, goal, start) {
-    const init = start === LEFT ? this.startLeft : this.startRight;
-    const { buckets, moves } = init(left, right, goal);
+    const { buckets, moves } =
+      start === LEFT
+        ? this.startLeft(left, right, goal)
+        : this.startRight(left, right, goal);
 
     this.goalIndex = buckets.indexOf(goal);
     this._moves = moves;
