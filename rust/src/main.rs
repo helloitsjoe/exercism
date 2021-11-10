@@ -1,7 +1,7 @@
 mod exercises;
 
 use chrono::Utc;
-use exercises::{buffer, gigasecond, lasagna, magazine, reverse_string, rpn};
+use exercises::{buffer, clock, gigasecond, lasagna, magazine, reverse_string, rpn};
 
 fn main() {
     // reverse_string::reverse("foo");

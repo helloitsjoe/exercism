@@ -1,4 +1,5 @@
 pub mod buffer;
+pub mod clock;
 pub mod gigasecond;
 pub mod lasagna;
 pub mod magazine;
