@@ -28,8 +28,8 @@ impl Clock {
   }
 
   pub fn add_minutes(&self, minutes: i32) -> Self {
-    let (hours, new_minutes) = normalize_hours_mins(self.hours, self.minutes + minutes);
-    Clock::new(hours, new_minutes)
+    // let (hours, new_minutes) = normalize_hours_mins(self.hours, self.minutes + minutes);
+    Clock::new(self.hours, self.minutes + minutes)
   }
 }
 
