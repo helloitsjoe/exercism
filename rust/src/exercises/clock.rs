@@ -9,11 +9,8 @@ pub struct Clock {
 }
 
 fn normalize_hours_mins(hours: i32, minutes: i32) -> (i32, i32) {
-  let mut time_in_minutes = hours * 60 + minutes;
+  let mut time_in_minutes = (hours * 60 + minutes) % DAY_IN_MINUTES;
 
-  while time_in_minutes >= DAY_IN_MINUTES {
-    time_in_minutes -= DAY_IN_MINUTES;
-  }
   while time_in_minutes < 0 {
     time_in_minutes += DAY_IN_MINUTES;
   }
