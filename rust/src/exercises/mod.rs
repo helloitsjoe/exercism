@@ -1,3 +1,4 @@
+pub mod anagrams;
 pub mod buffer;
 pub mod clock;
 pub mod gigasecond;
