@@ -2,18 +2,21 @@ const EARTH_YEAR_IN_SECONDS: f64 = 365.25 * (24 * 60 * 60) as f64;
 
 #[derive(Debug)]
 pub struct Duration {
-  seconds: u64,
+  seconds: f64,
 }
 
 impl From<u64> for Duration {
   fn from(s: u64) -> Self {
-    Duration { seconds: s }
+    Duration {
+      seconds: (s as f64 / EARTH_YEAR_IN_SECONDS),
+    }
   }
 }
 
 pub trait Planet {
+  fn earth_relative() -> f64;
   fn years_during(d: &Duration) -> f64 {
-    d.seconds as f64 / EARTH_YEAR_IN_SECONDS
+    d.seconds / Self::earth_relative()
   }
 }
 
@@ -27,43 +30,43 @@ pub struct Uranus;
 pub struct Neptune;
 
 impl Planet for Mercury {
-  fn years_during(d: &Duration) -> f64 {
-    d.seconds as f64 / (EARTH_YEAR_IN_SECONDS * 0.2408467)
+  fn earth_relative() -> f64 {
+    0.2408467
   }
 }
 impl Planet for Venus {
-  fn years_during(d: &Duration) -> f64 {
-    d.seconds as f64 / (EARTH_YEAR_IN_SECONDS * 0.61519726)
+  fn earth_relative() -> f64 {
+    0.61519726
   }
 }
 impl Planet for Earth {
-  fn years_during(d: &Duration) -> f64 {
-    d.seconds as f64 / (EARTH_YEAR_IN_SECONDS * 1.0)
+  fn earth_relative() -> f64 {
+    1.0
   }
 }
 impl Planet for Mars {
-  fn years_during(d: &Duration) -> f64 {
-    d.seconds as f64 / (EARTH_YEAR_IN_SECONDS * 1.8808158)
+  fn earth_relative() -> f64 {
+    1.8808158
   }
 }
 impl Planet for Jupiter {
-  fn years_during(d: &Duration) -> f64 {
-    d.seconds as f64 / (EARTH_YEAR_IN_SECONDS * 11.862615)
+  fn earth_relative() -> f64 {
+    11.862615
   }
 }
 impl Planet for Saturn {
-  fn years_during(d: &Duration) -> f64 {
-    d.seconds as f64 / (EARTH_YEAR_IN_SECONDS * 29.447498)
+  fn earth_relative() -> f64 {
+    29.447498
   }
 }
 impl Planet for Uranus {
-  fn years_during(d: &Duration) -> f64 {
-    d.seconds as f64 / (EARTH_YEAR_IN_SECONDS * 84.016846)
+  fn earth_relative() -> f64 {
+    84.016846
   }
 }
 impl Planet for Neptune {
-  fn years_during(d: &Duration) -> f64 {
-    d.seconds as f64 / (EARTH_YEAR_IN_SECONDS * 164.79132)
+  fn earth_relative() -> f64 {
+    164.79132
   }
 }
 
