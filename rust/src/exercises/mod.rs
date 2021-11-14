@@ -7,3 +7,4 @@ pub mod magazine;
 pub mod reverse_string;
 pub mod rpn;
 pub mod space_age;
+pub mod sublist;
