@@ -1,8 +1,3 @@
-/// Create an empty vector
-pub fn create_empty() -> Vec<u8> {
-  Vec::new()
-}
-
 /// Create a buffer of `count` zeroes.
 ///
 /// Applications often use buffers when serializing data to send over the network.

@@ -1,3 +1,4 @@
+#![allow(unused_imports)]
 mod exercises;
 
 use chrono::Utc;

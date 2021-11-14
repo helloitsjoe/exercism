@@ -7,36 +7,35 @@ pub enum Comparison {
 }
 
 pub fn compare<T: PartialEq>(first: &[T], second: &[T], comparison: Comparison) -> Comparison {
-  for (i, el) in second.iter().enumerate() {
-    if &first[0] != el {
-      continue;
-    }
-    let end = i + first.len();
-    if end > second.len() {
-      return Comparison::Unequal;
-    }
-    let slice = &second[i..i + first.len()];
-    if first == slice {
-      return comparison;
-    }
+  if first.len() == 0 {
+    return comparison;
   }
+
+  // windows! Saw this in community solutions, my original solution below.
+  if second.windows(first.len()).any(|w| w == first) {
+    return comparison;
+  }
+
+  // for (i, el) in second.iter().enumerate() {
+  //   if &first[0] != el {
+  //     continue;
+  //   }
+
+  //   if i + first.len() > second.len() {
+  //     return Comparison::Unequal;
+  //   }
+
+  //   if first == &second[i..i + first.len()] {
+  //     return comparison;
+  //   }
+  // }
 
   return Comparison::Unequal;
 }
 
 pub fn sublist<T: PartialEq>(first: &[T], second: &[T]) -> Comparison {
-  if first.len() == second.len() {
-    if first == second {
-      return Comparison::Equal;
-    }
-  }
-
-  if first.len() == 0 {
-    return Comparison::Sublist;
-  }
-
-  if second.len() == 0 {
-    return Comparison::Superlist;
+  if first == second {
+    return Comparison::Equal;
   }
 
   if first.len() < second.len() {
@@ -44,8 +43,6 @@ pub fn sublist<T: PartialEq>(first: &[T], second: &[T]) -> Comparison {
   } else {
     return compare(second, first, Comparison::Superlist);
   }
-
-  return Comparison::Unequal;
 }
 
 #[test]
