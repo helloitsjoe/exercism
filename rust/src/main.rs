@@ -1,10 +1,7 @@
 #![allow(unused_imports)]
 mod exercises;
 
-use chrono::Utc;
-use exercises::{
-    anagrams, buffer, clock, gigasecond, lasagna, magazine, reverse_string, rpn, space_age, sublist,
-};
+use exercises::minesweeper;
 
 fn main() {
     // reverse_string::reverse("foo");
