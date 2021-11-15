@@ -1,19 +1,51 @@
-pub fn annotate(minefield: &[&str]) -> Vec<String> {
-  let mut output: Vec<Vec<String>> = (0..minefield.len())
+fn create_vec(minefield: &[&str]) -> Vec<Vec<String>> {
+  return (0..minefield.len())
     .map(|_r| {
       let len = minefield[0].chars().count();
       (0..len).map(|_c| String::from("")).collect()
     })
     .collect();
+}
 
-  for (row_idx, row) in minefield.iter().enumerate() {
-    for (sq_idx, _sq) in row.chars().enumerate() {
-      let orig = minefield[row_idx].as_bytes()[sq_idx];
-      output[row_idx][sq_idx] = String::from(orig as char);
+fn check_for_mines(r_idx: usize, c_idx: usize, minefield: &[&str]) -> String {
+  let orig = minefield[r_idx].as_bytes()[c_idx] as char;
+  if orig == '*' {
+    return String::from(orig);
+  }
+
+  let mut mines = 0;
+
+  for offset_r in 0..=2 {
+    for offset_c in 0..=2 {
+      // checked_sub is useful for checking potentially out-of-bounds indices
+      let row_offset = (r_idx + offset_r).checked_sub(1).unwrap_or(1000);
+      let col_offset = (c_idx + offset_c).checked_sub(1).unwrap_or(1000);
+
+      if row_offset >= minefield.len() || col_offset >= minefield[0].len() {
+        println!("out of bounds");
+        continue;
+      }
+
+      if minefield[row_offset].as_bytes()[col_offset] as char == '*' {
+        mines += 1;
+      }
+    }
+  }
+  if mines == 0 {
+    return String::from(" ");
+  }
+  mines.to_string()
+}
+
+pub fn annotate(minefield: &[&str]) -> Vec<String> {
+  let mut output = create_vec(minefield);
+
+  for (r_idx, row) in minefield.iter().enumerate() {
+    for (c_idx, _char) in row.chars().enumerate() {
+      output[r_idx][c_idx] = check_for_mines(r_idx, c_idx, minefield);
     }
   }
 
-  println!("{:?}", output);
   return output.iter().map(|row| row.join("")).collect();
 }
 
@@ -76,7 +108,6 @@ fn mine_surrounded_by_spaces() {
     ]);
 }
 #[test]
-#[ignore]
 fn space_surrounded_by_mines() {
   #[rustfmt::skip]
     run_test(&[
@@ -86,7 +117,6 @@ fn space_surrounded_by_mines() {
     ]);
 }
 #[test]
-#[ignore]
 fn horizontal_line() {
   #[rustfmt::skip]
     run_test(&[
@@ -94,7 +124,6 @@ fn horizontal_line() {
     ]);
 }
 #[test]
-#[ignore]
 fn horizontal_line_mines_at_edges() {
   #[rustfmt::skip]
     run_test(&[
@@ -102,7 +131,6 @@ fn horizontal_line_mines_at_edges() {
     ]);
 }
 #[test]
-#[ignore]
 fn vertical_line() {
   #[rustfmt::skip]
     run_test(&[
@@ -114,7 +142,6 @@ fn vertical_line() {
     ]);
 }
 #[test]
-#[ignore]
 fn vertical_line_mines_at_edges() {
   #[rustfmt::skip]
     run_test(&[
@@ -126,7 +153,6 @@ fn vertical_line_mines_at_edges() {
     ]);
 }
 #[test]
-#[ignore]
 fn cross() {
   #[rustfmt::skip]
     run_test(&[
@@ -138,7 +164,6 @@ fn cross() {
     ]);
 }
 #[test]
-#[ignore]
 fn large_board() {
   #[rustfmt::skip]
     run_test(&[
