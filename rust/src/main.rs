@@ -1,7 +1,7 @@
 #![allow(unused_imports)]
 mod exercises;
 
-use exercises::minesweeper;
+use exercises::luhn_checksum;
 
 fn main() {
     // reverse_string::reverse("foo");
