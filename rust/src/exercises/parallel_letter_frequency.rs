@@ -1,14 +1,43 @@
 use std::collections::HashMap;
 
 pub fn frequency(input: &[&str], worker_count: usize) -> HashMap<char, usize> {
-  unimplemented!(
-        "Count the frequency of letters in the given input '{:?}'. Ensure that you are using {} to process the input.",
-        input,
-        match worker_count {
-            1 => "1 worker".to_string(),
-            _ => format!("{} workers", worker_count),
+  let mut main_map = HashMap::new();
+
+  if input.len() == 0 {
+    return main_map;
+  }
+
+  let mut handles: Vec<std::thread::JoinHandle<HashMap<char, usize>>> = Vec::new();
+
+  for worker_id in 1..=worker_count {
+    let chars: Vec<char> = input
+      .iter()
+      .enumerate()
+      .filter(|&(i, _s)| (i + 1) / (i + worker_id) == 1)
+      .flat_map(|(_i, s)| s.to_lowercase().chars().collect::<Vec<char>>())
+      .collect();
+
+    let handle = std::thread::spawn(|| {
+      let mut map = HashMap::new();
+      for char in chars {
+        if char.is_alphabetic() {
+          map.insert(char, map.get(&char).unwrap_or(&0) + 1);
         }
-    );
+      }
+      return map;
+    });
+
+    handles.push(handle);
+    // let res = handle.join().unwrap();
+  }
+
+  for handle in handles {
+    for (&key, value) in handle.join().unwrap().iter() {
+      main_map.insert(key, main_map.get(&key).unwrap_or(&0) + value);
+    }
+  }
+
+  return main_map;
 }
 
 const ODE_AN_DIE_FREUDE: [&str; 8] = [
@@ -45,50 +74,43 @@ const STAR_SPANGLED_BANNER: [&str; 8] = [
 ];
 #[test]
 fn test_no_texts() {
-  assert_eq!(frequency::frequency(&[], 4), HashMap::new());
+  assert_eq!(frequency(&[], 4), HashMap::new());
 }
 #[test]
-#[ignore]
 fn test_one_letter() {
   let mut hm = HashMap::new();
   hm.insert('a', 1);
-  assert_eq!(frequency::frequency(&["a"], 4), hm);
+  assert_eq!(frequency(&["a"], 4), hm);
 }
 #[test]
-#[ignore]
 fn test_case_insensitivity() {
   let mut hm = HashMap::new();
   hm.insert('a', 2);
-  assert_eq!(frequency::frequency(&["aA"], 4), hm);
+  assert_eq!(frequency(&["aA"], 4), hm);
 }
 #[test]
-#[ignore]
 fn test_many_empty_lines() {
   let v = vec![""; 1000];
-  assert_eq!(frequency::frequency(&v[..], 4), HashMap::new());
+  assert_eq!(frequency(&v[..], 4), HashMap::new());
 }
 #[test]
-#[ignore]
 fn test_many_times_same_text() {
   let v = vec!["abc"; 1000];
   let mut hm = HashMap::new();
   hm.insert('a', 1000);
   hm.insert('b', 1000);
   hm.insert('c', 1000);
-  assert_eq!(frequency::frequency(&v[..], 4), hm);
+  assert_eq!(frequency(&v[..], 4), hm);
 }
 #[test]
-#[ignore]
 fn test_punctuation_doesnt_count() {
-  assert!(!frequency::frequency(&WILHELMUS, 4).contains_key(&','));
+  assert!(!frequency(&WILHELMUS, 4).contains_key(&','));
 }
 #[test]
-#[ignore]
 fn test_numbers_dont_count() {
-  assert!(!frequency::frequency(&["Testing, 1, 2, 3"], 4).contains_key(&'1'));
+  assert!(!frequency(&["Testing, 1, 2, 3"], 4).contains_key(&'1'));
 }
 #[test]
-#[ignore]
 fn test_all_three_anthems_1_worker() {
   let mut v = Vec::new();
   for anthem in [ODE_AN_DIE_FREUDE, WILHELMUS, STAR_SPANGLED_BANNER].iter() {
@@ -96,13 +118,12 @@ fn test_all_three_anthems_1_worker() {
       v.push(*line);
     }
   }
-  let freqs = frequency::frequency(&v[..], 1);
+  let freqs = frequency(&v[..], 1);
   assert_eq!(freqs.get(&'a'), Some(&49));
   assert_eq!(freqs.get(&'t'), Some(&56));
   assert_eq!(freqs.get(&'ü'), Some(&2));
 }
 #[test]
-#[ignore]
 fn test_all_three_anthems_3_workers() {
   let mut v = Vec::new();
   for anthem in [ODE_AN_DIE_FREUDE, WILHELMUS, STAR_SPANGLED_BANNER].iter() {
@@ -110,18 +131,17 @@ fn test_all_three_anthems_3_workers() {
       v.push(*line);
     }
   }
-  let freqs = frequency::frequency(&v[..], 3);
+  let freqs = frequency(&v[..], 3);
   assert_eq!(freqs.get(&'a'), Some(&49));
   assert_eq!(freqs.get(&'t'), Some(&56));
   assert_eq!(freqs.get(&'ü'), Some(&2));
 }
 #[test]
-#[ignore]
 fn test_non_integer_multiple_of_threads() {
   let v = vec!["abc"; 999];
   let mut hm = HashMap::new();
   hm.insert('a', 999);
   hm.insert('b', 999);
   hm.insert('c', 999);
-  assert_eq!(frequency::frequency(&v[..], 4), hm);
+  assert_eq!(frequency(&v[..], 4), hm);
 }

@@ -1,7 +1,7 @@
 #![allow(unused_imports)]
 mod exercises;
 
-use exercises::luhn_checksum;
+use exercises::parallel_letter_frequency;
 
 fn main() {
     // reverse_string::reverse("foo");
