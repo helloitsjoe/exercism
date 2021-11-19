@@ -28,7 +28,6 @@ pub fn frequency(input: &[&str], worker_count: usize) -> HashMap<char, usize> {
     });
 
     handles.push(handle);
-    // let res = handle.join().unwrap();
   }
 
   for handle in handles {
