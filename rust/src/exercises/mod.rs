@@ -4,9 +4,10 @@
 // pub mod gigasecond;
 // pub mod lasagna;
 // pub mod luhn_checksum;
+pub mod macros;
 // pub mod magazine;
 // pub mod minesweeper;
-pub mod parallel_letter_frequency;
+// pub mod parallel_letter_frequency;
 // pub mod reverse_string;
 // pub mod rpn;
 // pub mod space_age;
