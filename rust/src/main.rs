@@ -1,7 +1,7 @@
 #![allow(unused_imports)]
 mod exercises;
 
-use exercises::macros;
+use exercises::poker;
 
 fn main() {
     // reverse_string::reverse("foo");
