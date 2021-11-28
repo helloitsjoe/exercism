@@ -7,7 +7,13 @@ use std::collections::{HashMap, HashSet};
 type Hand = Vec<(u32, char)>;
 
 pub fn winning_hands<'a>(hands: &[&'a str]) -> Vec<&'a str> {
-  unimplemented!("Out of {:?}, which hand wins?", hands)
+  // unimplemented!("Out of {:?}, which hand wins?", hands)
+  // Sort all hands
+  // hands.sort_by(|a, b| get_hand_rank(a) > get_hand_rank(b));
+  let mut hands_vec = Vec::from(hands);
+  hands_vec.sort_by(|a, b| a.partial_cmp(b).unwrap());
+  hands_vec
+  // return vec![hands[0]];
 }
 
 fn hand_as_vec<'a>(hand: &'a str) -> Hand {
@@ -132,7 +138,6 @@ fn test<'a, 'b>(input: &[&'a str], expected: &[&'b str]) {
   assert_eq!(hs_from(&winning_hands(input)), hs_from(expected))
 }
 #[test]
-#[ignore]
 fn test_single_hand_always_wins() {
   test(&["4S 5S 7H 8D JC"], &["4S 5S 7H 8D JC"])
 }
@@ -188,13 +193,11 @@ fn test_pair() {
 }
 
 #[test]
-#[ignore]
 fn test_duplicate_hands_always_tie() {
   let input = &["3S 4S 5D 6H JH", "3S 4S 5D 6H JH", "3S 4S 5D 6H JH"];
   assert_eq!(&winning_hands(input), input)
 }
 #[test]
-#[ignore]
 fn test_highest_card_of_all_hands_wins() {
   test(
     &["4D 5S 6S 8D 3C", "2S 4C 7S 9H 10H", "3S 4S 5D 6H JH"],
