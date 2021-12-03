@@ -1,3 +1,4 @@
+use std::cmp::Ordering;
 /// Given a list of poker hands, return a list of those hands which win.
 ///
 /// Note the type signature: this function should return _the same_ reference to
@@ -6,12 +7,44 @@ use std::collections::{HashMap, HashSet};
 
 type Hand = Vec<(u32, char)>;
 
+struct PokerHand {
+  // cards: Hand,
+  rank: u32,
+}
+
+impl PokerHand {
+  fn new(hand: &str) -> Self {
+    // let cards = hand_as_vec(hand);
+    let rank = get_hand_rank(hand);
+
+    PokerHand {
+      // cards,
+      rank,
+    }
+  }
+}
+
+impl PartialOrd for PokerHand {
+  fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+    self.rank.partial_cmp(&other.rank)
+  }
+}
+
+impl PartialEq for PokerHand {
+  fn eq(&self, other: &Self) -> bool {
+    self.rank == other.rank
+  }
+}
+
 pub fn winning_hands<'a>(hands: &[&'a str]) -> Vec<&'a str> {
   // unimplemented!("Out of {:?}, which hand wins?", hands)
   // Sort all hands
-  // hands.sort_by(|a, b| get_hand_rank(a) > get_hand_rank(b));
   let mut hands_vec = Vec::from(hands);
-  hands_vec.sort_by(|a, b| a.partial_cmp(b).unwrap());
+  hands_vec.sort_by(|a, b| {
+    PokerHand::new(a)
+      .partial_cmp(&PokerHand::new(b))
+      .unwrap_or(Ordering::Less)
+  });
   hands_vec
   // return vec![hands[0]];
 }
