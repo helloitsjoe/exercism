@@ -4,6 +4,7 @@ use std::cmp::Ordering;
 /// Note the type signature: this function should return _the same_ reference to
 /// the winning hand(s) as were passed in, not reconstructed strings which happen to be equal.
 use std::collections::{HashMap, HashSet};
+use std::fmt;
 
 type Hand = Vec<(u32, char)>;
 
@@ -24,6 +25,14 @@ impl PokerHand {
   }
 }
 
+impl std::fmt::Debug for PokerHand {
+  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    f.debug_struct("PokerHand")
+      .field("rank", &self.rank)
+      .finish()
+  }
+}
+
 impl PartialOrd for PokerHand {
   fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
     self.rank.partial_cmp(&other.rank)
@@ -40,17 +49,31 @@ pub fn winning_hands<'a>(hands: &[&'a str]) -> Vec<&'a str> {
   // unimplemented!("Out of {:?}, which hand wins?", hands)
   // Sort all hands
   let mut hands_vec = Vec::from(hands);
+
   hands_vec.sort_by(|a, b| {
     PokerHand::new(a)
       .partial_cmp(&PokerHand::new(b))
       .unwrap_or(Ordering::Less)
   });
-  hands_vec
-  // return vec![hands[0]];
+  let top_rank = hands_vec[0];
+  // let top_rank = PokerHand::new(top_rank);
+  println!("{:?}", top_rank);
+
+  let mut winners = Vec::new();
+  for &hand in &hands_vec {
+    if PokerHand::new(hand).rank == PokerHand::new(top_rank).rank {
+      println!("{:?}", PokerHand::new(hand).rank);
+      winners.push(hand);
+    }
+  }
+
+  // hands_vec.iter().filter(|h| h == top_rank).collect::<Vec<&'a str>>()
+  // return vec![top_rank];
+  winners
 }
 
 fn hand_as_vec<'a>(hand: &'a str) -> Hand {
-  let hand: Hand = hand
+  let mut hand: Hand = hand
     .split(' ')
     .map(|card: &str| {
       let mut ch = card.chars();
@@ -76,11 +99,15 @@ fn hand_as_vec<'a>(hand: &'a str) -> Hand {
     })
     .collect();
 
+  hand.sort_by(|a, b| a.partial_cmp(b).unwrap());
+  // println!("{:?}", hand);
   hand
 }
 
 fn is_straight(hand: &Hand) -> bool {
+  // Redundant, hand should already be sorted
   let mut sorted = hand.iter().map(|&(val, _)| val).collect::<Vec<u32>>();
+  // hand.sort_by(|a, b| a.partial_cmp(b).unwrap());
   sorted.sort();
 
   let straight = sorted.iter().fold(0, |prev, &curr| {
@@ -133,6 +160,7 @@ fn get_hand_rank<'a>(hand: &'a str) -> u32 {
   let two = has_count(2, &counts);
   let three = has_count(3, &counts);
   let four = has_count(4, &counts);
+  let high_card = hand_vec.last().unwrap();
 
   if straight && flush {
     1
@@ -149,7 +177,8 @@ fn get_hand_rank<'a>(hand: &'a str) -> u32 {
   // } else if two && two {
   //   7
   } else {
-    8
+    // println!("{:?}", high_card);
+    8 + 14 - high_card.0
   }
 }
 
@@ -238,7 +267,6 @@ fn test_highest_card_of_all_hands_wins() {
   )
 }
 #[test]
-#[ignore]
 fn test_a_tie_has_multiple_winners() {
   test(
     &[
@@ -251,7 +279,6 @@ fn test_a_tie_has_multiple_winners() {
   )
 }
 #[test]
-#[ignore]
 fn test_high_card_can_be_low_card_in_an_otherwise_tie() {
   // multiple hands with the same high cards, tie compares next highest ranked,
   // down to last card
