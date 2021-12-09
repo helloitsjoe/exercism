@@ -196,12 +196,20 @@ fn compare_hands(a: &Hand, b: &Hand) -> Ordering {
 fn compare_equal_hands(a: &Hand, b: &Hand) -> Ordering {
   println!("{:?}", a);
   println!("{:?}", b);
+
+  let counts_a = get_counts(a);
+  let counts_b = get_counts(b);
+
+  if has_two_pair(&counts_a) {
+    for (key, val) in counts_a {
+      println!("{:?}", val);
+    }
+  }
+
   for (i, card) in a.iter().enumerate() {
-    if card.0 == b[i].0 {
-      continue;
-    } else if card.0 > b[i].0 {
+    if card.0 > b[i].0 {
       return Ordering::Less;
-    } else {
+    } else if card.0 < b[i].0 {
       return Ordering::Greater;
     }
   }
