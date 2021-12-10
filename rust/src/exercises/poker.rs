@@ -142,15 +142,13 @@ fn has_count(num: u32, counts: &HashMap<&u32, u32>) -> bool {
 }
 
 fn has_two_pair(counts: &HashMap<&u32, u32>) -> bool {
-  let mut found = false;
+  let mut pairs = 0;
   for (_, &val) in counts {
-    if found {
-      return true;
-    } else if val == 2 {
-      found = true;
+    if val == 2 {
+      pairs += 1;
     }
   }
-  found
+  pairs == 2
 }
 
 fn get_hand_rank<'a>(hand_vec: &Hand) -> u32 {
@@ -184,28 +182,38 @@ fn get_hand_rank<'a>(hand_vec: &Hand) -> u32 {
 }
 
 fn compare_hands(a: &Hand, b: &Hand) -> Ordering {
+  let rank_a = get_hand_rank(a);
+  let rank_b = get_hand_rank(b);
+
   // TODO: Lift unwrap()
-  let rough = get_hand_rank(&a).partial_cmp(&get_hand_rank(b)).unwrap();
+  let rough = rank_a.partial_cmp(&rank_b).unwrap();
   if rough == Ordering::Equal {
-    compare_equal_hands(a, b)
+    if rank_a == 7 {
+      // This is very awkward, there must be a
+      // better way to compare hands generically
+      compare_equal_two_pair(get_counts(a), get_counts(b))
+    } else {
+      compare_equal_hands(a, b)
+    }
   } else {
     rough
   }
 }
 
+fn compare_equal_two_pair(counts_a: HashMap<&u32, u32>, counts_b: HashMap<&u32, u32>) -> Ordering {
+  let mut counts_a_vec: Vec<_> = counts_a.iter().collect();
+  let mut counts_b_vec: Vec<_> = counts_b.iter().collect();
+
+  // So much sorting/reversing! Fix this.
+  counts_a_vec.sort_by(|a, b| a.0.cmp(b.0).reverse());
+  counts_a_vec.sort_by(|a, b| a.1.cmp(b.1).reverse());
+  counts_b_vec.sort_by(|a, b| a.0.cmp(b.0).reverse());
+  counts_b_vec.sort_by(|a, b| a.1.cmp(b.1).reverse());
+
+  return counts_a_vec.partial_cmp(&counts_b_vec).unwrap().reverse();
+}
+
 fn compare_equal_hands(a: &Hand, b: &Hand) -> Ordering {
-  println!("{:?}", a);
-  println!("{:?}", b);
-
-  let counts_a = get_counts(a);
-  let counts_b = get_counts(b);
-
-  if has_two_pair(&counts_a) {
-    for (key, val) in counts_a {
-      println!("{:?}", val);
-    }
-  }
-
   for (i, card) in a.iter().enumerate() {
     if card.0 > b[i].0 {
       return Ordering::Less;
