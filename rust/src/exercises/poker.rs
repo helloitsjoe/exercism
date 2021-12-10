@@ -100,11 +100,13 @@ fn hand_as_vec<'a>(hand: &'a str) -> Hand {
 }
 
 fn is_straight(sorted_hand: &Hand) -> bool {
+  println!("{:?}", sorted_hand);
   let straight = sorted_hand.iter().fold(0, |prev, &(curr, _)| {
-    // println!("{:?}", curr);
     if prev == 0 || curr == prev + 1 {
       curr
     } else if curr == 14 && sorted_hand[0].0 == 2 {
+      // sorted_hand.rotate_right(1);
+      // sorted_hand[0].0 = 1;
       curr
     } else {
       100
@@ -192,6 +194,8 @@ fn compare_hands(a: &Hand, b: &Hand) -> Ordering {
       // This is very awkward, there must be a
       // better way to compare hands generically
       compare_equal_two_pair(get_counts(a), get_counts(b))
+    } else if rank_a == 5 {
+      compare_straights(a, b)
     } else {
       compare_equal_hands(a, b)
     }
@@ -211,6 +215,21 @@ fn compare_equal_two_pair(counts_a: HashMap<&u32, u32>, counts_b: HashMap<&u32, 
   counts_b_vec.sort_by(|a, b| a.1.cmp(b.1).reverse());
 
   return counts_a_vec.partial_cmp(&counts_b_vec).unwrap().reverse();
+}
+
+fn make_ace_low_straight(hand: &Hand) -> Hand {
+  let mut new_hand = hand.clone();
+  if hand.first().unwrap().0 == 2 && hand.last().unwrap().0 == 14 {
+    new_hand.rotate_right(1);
+    new_hand[0].0 = 1;
+  }
+  return new_hand;
+}
+
+fn compare_straights(a: &Hand, b: &Hand) -> Ordering {
+  let sanitized_a = make_ace_low_straight(a);
+  let sanitized_b = make_ace_low_straight(b);
+  compare_equal_hands(&sanitized_a, &sanitized_b)
 }
 
 fn compare_equal_hands(a: &Hand, b: &Hand) -> Ordering {
@@ -267,14 +286,13 @@ fn test_is_straight() {
 }
 
 #[test]
-#[ignore]
 fn test_is_straight_aces() {
   assert_eq!(
-    is_straight(&vec![(1, 'S'), (2, 'S'), (3, 'H'), (4, 'D'), (5, 'C')]),
+    is_straight(&vec![(2, 'S'), (3, 'H'), (4, 'D'), (5, 'C'), (14, 'S')]),
     true
   );
   assert_eq!(
-    is_straight(&vec![(10, 'S'), (11, 'S'), (12, 'H'), (13, 'D'), (1, 'C')]),
+    is_straight(&vec![(10, 'S'), (11, 'S'), (12, 'H'), (13, 'D'), (14, 'C')]),
     true
   );
 }
@@ -403,7 +421,6 @@ fn test_straight_cascade() {
   test(&["4S 6C 7S 8D 5H", "5S 7H 8S 9D 6H"], &["5S 7H 8S 9D 6H"])
 }
 #[test]
-#[ignore]
 fn test_straight_scoring() {
   // even though an ace is usually high, a 5-high straight is the lowest-scoring straight
   test(&["2H 3C 4D 5D 6H", "4S AH 3S 2D 5H"], &["2H 3C 4D 5D 6H"])
