@@ -7,18 +7,19 @@ use std::collections::{HashMap, HashSet};
 use std::fmt;
 
 type Hand = Vec<(u32, char)>;
+type Counts = HashMap<u32, u32>;
 
 struct PokerHand {
   cards: Hand,
+  counts: Counts,
 }
 
 impl PokerHand {
   fn new(hand: &str) -> Self {
     let cards = hand_as_vec(hand);
+    let counts = get_counts(&cards);
 
-    PokerHand {
-      cards: cards.clone(),
-    }
+    PokerHand { cards, counts }
   }
 }
 
@@ -32,13 +33,13 @@ impl std::fmt::Debug for PokerHand {
 
 impl PartialOrd for PokerHand {
   fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-    Some(compare_hands(&self.cards, &other.cards))
+    Some(compare_hands(&self, &other))
   }
 }
 
 impl PartialEq for PokerHand {
   fn eq(&self, other: &Self) -> bool {
-    compare_hands(&self.cards, &other.cards) == Ordering::Equal
+    compare_hands(&self, &other) == Ordering::Equal
   }
 }
 
@@ -59,7 +60,7 @@ pub fn winning_hands<'a>(hands: &[&'a str]) -> Vec<&'a str> {
   for &hand in hands {
     // TODO: Better way to do this?
     let poker_hand = PokerHand::new(hand);
-    if compare_hands(&poker_hand.cards, &top_hand.cards) == Ordering::Equal {
+    if compare_hands(&poker_hand, &top_hand) == Ordering::Equal {
       winners.push(hand);
     }
   }
@@ -128,22 +129,22 @@ fn is_flush(hand: &Hand) -> bool {
   flush != 'N'
 }
 
-fn get_counts(hand: &Hand) -> HashMap<&u32, u32> {
-  let mut hm: HashMap<&u32, u32> = HashMap::new();
+fn get_counts(hand: &Hand) -> Counts {
+  let mut hm: Counts = HashMap::new();
   for (val, _ch) in hand {
-    hm.insert(val, *hm.get(val).unwrap_or(&0) + 1);
+    hm.insert(*val, *hm.get(val).unwrap_or(&0) + 1);
   }
   hm
 }
 
-fn has_count(num: u32, counts: &HashMap<&u32, u32>) -> bool {
+fn has_count(num: u32, counts: &Counts) -> bool {
   return counts
     .iter()
     .find_map(|(_k, &v)| if v == num { Some(true) } else { None })
     .unwrap_or(false);
 }
 
-fn has_two_pair(counts: &HashMap<&u32, u32>) -> bool {
+fn has_two_pair(counts: &Counts) -> bool {
   let mut pairs = 0;
   for (_, &val) in counts {
     if val == 2 {
@@ -153,14 +154,13 @@ fn has_two_pair(counts: &HashMap<&u32, u32>) -> bool {
   pairs == 2
 }
 
-fn get_hand_rank<'a>(hand_vec: &Hand) -> u32 {
-  let straight = is_straight(&hand_vec);
-  let flush = is_flush(&hand_vec);
-  let counts = get_counts(&hand_vec);
-  let two_pair = has_two_pair(&counts);
-  let two = has_count(2, &counts);
-  let three = has_count(3, &counts);
-  let four = has_count(4, &counts);
+fn get_hand_rank<'a>(hand: &PokerHand) -> u32 {
+  let straight = is_straight(&hand.cards);
+  let flush = is_flush(&hand.cards);
+  let two_pair = has_two_pair(&hand.counts);
+  let two = has_count(2, &hand.counts);
+  let three = has_count(3, &hand.counts);
+  let four = has_count(4, &hand.counts);
 
   if straight && flush {
     1
@@ -183,28 +183,27 @@ fn get_hand_rank<'a>(hand_vec: &Hand) -> u32 {
   }
 }
 
-fn compare_hands(a: &Hand, b: &Hand) -> Ordering {
+fn compare_hands(a: &PokerHand, b: &PokerHand) -> Ordering {
   let rank_a = get_hand_rank(a);
   let rank_b = get_hand_rank(b);
 
-  // TODO: Lift unwrap()
   let rough = rank_a.partial_cmp(&rank_b).unwrap();
   if rough == Ordering::Equal {
     if rank_a == 7 {
       // This is very awkward, there must be a
       // better way to compare hands generically
-      compare_equal_two_pair(get_counts(a), get_counts(b))
+      compare_equal_two_pair(&a.counts, &b.counts)
     } else if rank_a == 5 {
-      compare_straights(a, b)
+      compare_straights(&a.cards, &b.cards)
     } else {
-      compare_equal_hands(a, b)
+      compare_equal_hands(&a.cards, &b.cards)
     }
   } else {
     rough
   }
 }
 
-fn compare_equal_two_pair(counts_a: HashMap<&u32, u32>, counts_b: HashMap<&u32, u32>) -> Ordering {
+fn compare_equal_two_pair(counts_a: &Counts, counts_b: &Counts) -> Ordering {
   let mut counts_a_vec: Vec<_> = counts_a.iter().collect();
   let mut counts_b_vec: Vec<_> = counts_b.iter().collect();
 
