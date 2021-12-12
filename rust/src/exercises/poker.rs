@@ -106,8 +106,7 @@ fn is_straight(sorted_hand: &Hand) -> bool {
     if prev == 0 || curr == prev + 1 {
       curr
     } else if curr == 14 && sorted_hand[0].0 == 2 {
-      // sorted_hand.rotate_right(1);
-      // sorted_hand[0].0 = 1;
+      make_ace_low_straight(sorted_hand);
       curr
     } else {
       100
@@ -187,19 +186,20 @@ fn compare_hands(a: &PokerHand, b: &PokerHand) -> Ordering {
   let rank_a = get_hand_rank(a);
   let rank_b = get_hand_rank(b);
 
-  let rough = rank_a.partial_cmp(&rank_b).unwrap();
-  if rough == Ordering::Equal {
-    if rank_a == 7 {
-      // This is very awkward, there must be a
-      // better way to compare hands generically
-      compare_equal_two_pair(&a.counts, &b.counts)
-    } else if rank_a == 5 {
-      compare_straights(&a.cards, &b.cards)
-    } else {
-      compare_equal_hands(&a.cards, &b.cards)
-    }
+  let rough = rank_a.cmp(&rank_b);
+
+  if rough != Ordering::Equal {
+    return rough;
+  }
+
+  // This is very awkward, there must be a
+  // better way to compare hands generically
+  if rank_a == 7 {
+    compare_equal_two_pair(&a.counts, &b.counts)
+  } else if rank_a == 5 {
+    compare_straights(&a.cards, &b.cards)
   } else {
-    rough
+    compare_equal_hands(&a.cards, &b.cards)
   }
 }
 
@@ -213,7 +213,7 @@ fn compare_equal_two_pair(counts_a: &Counts, counts_b: &Counts) -> Ordering {
   counts_b_vec.sort_by(|a, b| a.0.cmp(b.0).reverse());
   counts_b_vec.sort_by(|a, b| a.1.cmp(b.1).reverse());
 
-  return counts_a_vec.partial_cmp(&counts_b_vec).unwrap().reverse();
+  return counts_a_vec.cmp(&counts_b_vec).reverse();
 }
 
 fn make_ace_low_straight(hand: &Hand) -> Hand {
@@ -239,7 +239,7 @@ fn compare_equal_hands(a: &Hand, b: &Hand) -> Ordering {
       return Ordering::Greater;
     }
   }
-  return Ordering::Equal;
+  Ordering::Equal
 }
 
 // ======= TESTS =======
