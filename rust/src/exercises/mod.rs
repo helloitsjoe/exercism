@@ -1,4 +1,5 @@
 // pub mod anagrams;
+pub mod armstrong_number;
 // pub mod buffer;
 // pub mod clock;
 // pub mod gigasecond;
@@ -8,7 +9,7 @@
 // pub mod magazine;
 // pub mod minesweeper;
 // pub mod parallel_letter_frequency;
-pub mod poker;
+// pub mod poker;
 // pub mod reverse_string;
 // pub mod rpn;
 // pub mod space_age;
