@@ -1,19 +1,20 @@
 pub mod acronym {
-  use regex::Regex;
-
   pub fn abbreviate(phrase: &str) -> String {
-    // Probably a way to split on camelCase but didn't look into Rust RegEx lookaheads
-    let replace_emphasis = Regex::new(r"_(\w+)_").unwrap();
-    let replace_camel = Regex::new(r"([a-z])([A-Z])").unwrap();
-    let phrase = &replace_emphasis.replace_all(phrase, "$1");
-    let phrase = &replace_camel.replace_all(phrase, "$1 $2");
+    let mut camelcase = String::from(phrase);
 
-    // This RegEx is not robust but covers the test cases!
-    let split_re = Regex::new(r"(\s|-)+").unwrap();
-    let words = split_re.split(phrase);
+    // Could do this with regex but exercism doesn't seem to work with external crates
+    for (i, ch) in phrase.chars().enumerate() {
+      if i > 0 && ch.is_uppercase() && phrase.chars().nth(i - 1).unwrap().is_lowercase() {
+        camelcase.insert_str(i, " ")
+      }
+    }
+
+    // This is not robust but covers the test cases!
+    let words = camelcase.split(&[' ', '-', '_'][..]);
+
     return words.fold(String::from(""), |acc, curr| {
       let initial = &curr.chars().nth(0);
-      if let Some(char) = initial {
+      if let Some(_char) = initial {
         acc + &initial.unwrap().to_uppercase().to_string()
       } else {
         acc
