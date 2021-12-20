@@ -1,5 +1,6 @@
+pub mod acronym;
 // pub mod anagrams;
-pub mod armstrong_number;
+// pub mod armstrong_number;
 // pub mod buffer;
 // pub mod clock;
 // pub mod gigasecond;
