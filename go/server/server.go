@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 )
 
@@ -23,5 +24,7 @@ func main() {
 
 	fmt.Println("Listening on http://localhost:8080/test")
 
-	http.ListenAndServe(":8080", nil)
+	if err := http.ListenAndServe(":8080", nil); err != nil {
+		log.Fatal(err)
+	}
 }
