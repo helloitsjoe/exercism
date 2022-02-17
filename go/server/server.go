@@ -19,10 +19,12 @@ func headers(w http.ResponseWriter, req *http.Request) {
 }
 
 func main() {
+	fileServer := http.FileServer(http.Dir("./static"))
+	http.Handle("/", fileServer)
 	http.HandleFunc("/test", test)
 	http.HandleFunc("/headers", headers)
 
-	fmt.Println("Listening on http://localhost:8080/test")
+	fmt.Println("Listening on http://localhost:8080")
 
 	if err := http.ListenAndServe(":8080", nil); err != nil {
 		log.Fatal(err)
