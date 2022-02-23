@@ -23,7 +23,7 @@ func formHandler(w http.ResponseWriter, req *http.Request) {
 		fmt.Fprintf(w, "Parse error: %v", err)
 		return
 	}
-	fmt.Fprint(w, "Handling form...")
+	fmt.Fprint(w, "Handling form...\n")
 	name := req.FormValue("name")
 	email := req.FormValue("email")
 
