@@ -5,6 +5,15 @@ import (
   "time"
 )
 
+
+func worker(done chan bool) {
+  fmt.Print("working...")
+  time.Sleep(time.Second)
+  fmt.Println("done")
+
+  done <- true
+}
+
 func Channels() {
   messages := make(chan string)
 
@@ -20,14 +29,6 @@ func Channels() {
 
   fmt.Println(<-bufferedMessages)
   fmt.Println(<-bufferedMessages)
-
-  worker := func (done chan bool) {
-    fmt.Print("working...")
-    time.Sleep(time.Second)
-    fmt.Println("done")
-
-    done <- true
-  }
 
   done := make(chan bool, 1)
   go worker(done)
