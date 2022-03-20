@@ -16,3 +16,7 @@ func PreparationTime(numberOfLayers int) int {
 func ElapsedTime(numberOfLayers, actualMinutesInOven int) int {
 	panic("ElapsedTime not implemented")
 }
+
+func Lasagna() {
+	RemainingOvenTime(10)
+}

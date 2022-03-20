@@ -1,7 +1,7 @@
 package main
 
-import lasagna "exercism/lasagna"
+import "exercism/twofer"
 
 func main() {
-	lasagna.RemainingOvenTime(10)
+	twofer.ShareWith()
 }
