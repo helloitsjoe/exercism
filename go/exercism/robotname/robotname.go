@@ -5,54 +5,67 @@ import (
 	"errors"
 	"fmt"
 	"math/rand"
-	"time"
 )
-
-var caps = []rune("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
-var names = map[string]bool{}
-
-const TRIES = 10
 
 type Robot struct {
 	name string
 }
 
-var r = rand.Intn
+var names = generateNames()
 
-func generateName() string {
-	first := string(caps[rand.Intn(len(caps))])
-	second := string(caps[rand.Intn(len(caps))])
+func getName() string {
+	// Previous (slow) solution
+	// i := rand.Intn(len(names))
+	// name := names[i]
+	// names = append(names[:i], names[i+1:]...)
+	// return name
 
-	return fmt.Sprintf("%s%s%d%d%d", first, second, r(10), r(10), r(10))
+	name := names[0]
+	names = names[1:]
+	return name
+}
+
+// Create a slice of robot names going sequentially.
+// When Reset is called, remove that name from the list.
+// When the list is empty, return an error
+var generateNames = func() []string {
+	var names = make([]string, 0)
+	var caps = []rune("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+
+	for _, cap1 := range caps {
+		for _, cap2 := range caps {
+			for i := 0; i < 1000; i++ {
+				num := fmt.Sprintf("%03d", i)
+				name := string(cap1) + string(cap2) + num
+				names = append(names, name)
+			}
+		}
+	}
+
+	rand.Shuffle(26*26*1000, func(i, j int) {
+		names[i], names[j] = names[j], names[i]
+	})
+
+	return names
 }
 
 // Name returns the Robot's name.
 func (r *Robot) Name() (string, error) {
 	// Robot has a unique name, 2 uppercase letters and 3 numbers
 	if r.name == "" {
-		name, err := r.Reset()
-		if err != nil {
-			return "", err
+		r.Reset()
+		if r.name == "" {
+			return "", errors.New("names have run out!")
 		}
-		r.name = name
 	}
 	return r.name, nil
 }
 
-var tries = TRIES
-
 // Reset generates a new random name and sets it on the robot.
-func (r *Robot) Reset() (string, error) {
-	rand.Seed(time.Now().UnixNano())
-	r.name = generateName()
-	if names[r.name] == true {
-		tries--
-		if tries == 0 {
-			return "", errors.New("names have run out!")
-		}
-		r.Reset()
+func (r *Robot) Reset() {
+	if len(names) == 0 {
+		r.name = ""
+	} else {
+		r.name = getName()
 	}
-	tries = TRIES
-	names[r.name] = true
-	return r.name, nil
 }
