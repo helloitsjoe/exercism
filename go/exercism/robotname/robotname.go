@@ -26,9 +26,10 @@ func getName() string {
 }
 
 // Create a slice of robot names going sequentially.
-// When Reset is called, remove that name from the list.
+// When Name is called, remove that name from the list.
 // When the list is empty, return an error
 var generateNames = func() []string {
+	// Robot has a unique name, 2 uppercase letters and 3 numbers
 	var names = make([]string, 0)
 	var caps = []rune("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
@@ -51,7 +52,6 @@ var generateNames = func() []string {
 
 // Name returns the Robot's name.
 func (r *Robot) Name() (string, error) {
-	// Robot has a unique name, 2 uppercase letters and 3 numbers
 	if r.name == "" {
 		r.Reset()
 		if r.name == "" {
