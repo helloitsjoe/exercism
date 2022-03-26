@@ -1,9 +1,6 @@
 package letter
 
-import (
-	"fmt"
-	"sync"
-)
+import "sync"
 
 type FreqMap map[rune]int
 
@@ -15,13 +12,12 @@ func Frequency(s string) FreqMap {
 	return m
 }
 
-func worker(s string, c chan bool, sm *sync.Map) {
+func worker(s string, sm *sync.Map, wg *sync.WaitGroup) {
 	freq := Frequency(s)
 
 	for k, v := range freq {
 		existing, exists := sm.Load(k)
-
-		// Convert to int - not sure why this is needed
+		// convert interface{} type to int
 		okInt, _ := existing.(int)
 		if exists {
 			sm.Store(k, v+okInt)
@@ -30,31 +26,28 @@ func worker(s string, c chan bool, sm *sync.Map) {
 		}
 	}
 
-	c <- true
-	// Removing the following fmt.Println makes this fail. Why?
-	// fmt.Println("s", s[:1])
+	wg.Done()
 }
 
 func ConcurrentFrequency(l []string) FreqMap {
-	done := make(chan bool, len(l))
-	var sm sync.Map
-	// var wg sync.WaitGroup
+	// We want these to be pointers so we use new() Could also create them as
+	// structs and pass them with &, but this makes it clearer that they should
+	// be used as pointers.
+	sm := new(sync.Map)
+	wg := new(sync.WaitGroup)
 
 	for _, passage := range l {
-		// wg.Add(1)
-		go worker(passage, done, &sm)
+		wg.Add(1)
+		go worker(passage, sm, wg)
 	}
 
-	noted := <-done
-	// wg.Wait()
-	fmt.Println("done", noted)
+	wg.Wait()
 
 	m := map[rune]int{}
 
 	sm.Range(func(k interface{}, v interface{}) bool {
 		key, _ := k.(rune)
 		val, _ := v.(int)
-		fmt.Println(key, ":", val)
 		m[key] = val
 		return true
 	})
