@@ -149,9 +149,9 @@ func TestMoreSeqCases(t *testing.T) {
 	}
 }
 func TestConcClose(t *testing.T) {
-	if runtime.NumCPU() < 2 {
-		t.Skip("Multiple CPU cores required for concurrency tests.")
-	}
+	// if runtime.NumCPU() < 2 {
+	// 	t.Skip("Multiple CPU cores required for concurrency tests.")
+	// }
 	if runtime.GOMAXPROCS(0) < 2 {
 		runtime.GOMAXPROCS(2)
 	}
@@ -211,9 +211,9 @@ func TestConcClose(t *testing.T) {
 	}
 }
 func TestConcDeposit(t *testing.T) {
-	if runtime.NumCPU() < 2 {
-		t.Skip("Multiple CPU cores required for concurrency tests.")
-	}
+	// if runtime.NumCPU() < 2 {
+	// 	t.Skip("Multiple CPU cores required for concurrency tests.")
+	// }
 	if runtime.GOMAXPROCS(0) < 2 {
 		runtime.GOMAXPROCS(2)
 	}
