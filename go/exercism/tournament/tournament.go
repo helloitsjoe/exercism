@@ -4,16 +4,18 @@ package tournament
 import (
 	"fmt"
 	"io"
+	"sort"
 	"strings"
 )
 
-// type record struct {
-// 	matches int
-// 	wins    int
-// 	draws   int
-// 	losses  int
-// 	poins   int
-// }
+type formattedRecord struct {
+	name    string
+	matches int
+	win     int
+	draw    int
+	loss    int
+	points  int
+}
 
 type record = map[string]int
 
@@ -34,11 +36,17 @@ func parseReader(reader io.Reader) (string, error) {
 	return s, nil
 }
 
+func convertToWrite(s string) ([]byte, error) {
+	b := make([]byte, 8)
+	for _, char := range s {
+		b = append(b, byte(char))
+	}
+	return b, nil
+}
+
 func getRecords(s string) map[string]record {
 	games := strings.Split(s, "\n")
 	records := make(map[string]record)
-	fmt.Println(games)
-	fmt.Println(len(games))
 
 	for _, game := range games {
 		// Why is this empty sometimes?
@@ -50,57 +58,78 @@ func getRecords(s string) map[string]record {
 
 		firstTeam := r[0]
 		secondTeam := r[1]
-		outcome := r[2]
+		firstOutcome := r[2]
 
-		var oppositeOutcome string
-		if outcome == "win" {
-			oppositeOutcome = "loss"
-		} else if outcome == "loss" {
-			oppositeOutcome = "win"
+		var secondOutcome string
+		var firstPoints int
+		var secondPoints int
+		if firstOutcome == "win" {
+			firstPoints = 3
+			secondPoints = 0
+			secondOutcome = "loss"
+		} else if firstOutcome == "loss" {
+			firstPoints = 0
+			secondPoints = 3
+			secondOutcome = "win"
 		} else {
-			oppositeOutcome = "draw"
+			firstPoints = 1
+			secondPoints = 1
+			secondOutcome = "draw"
 		}
 
 		var firstRecord record
 		if val, ok := records[firstTeam]; ok {
 			firstRecord = val
 			firstRecord["matches"] += 1
-			firstRecord[outcome] += 1
+			firstRecord[firstOutcome] += 1
+			firstRecord["points"] += firstPoints
 		} else {
 			firstRecord = make(record)
 			firstRecord["matches"] = 1
-			firstRecord[outcome] = 1
+			firstRecord[firstOutcome] = 1
+			firstRecord["points"] = firstPoints
 		}
 
 		var secondRecord record
 		if val, ok := records[secondTeam]; ok {
 			secondRecord = val
 			secondRecord["matches"] += 1
-			secondRecord[oppositeOutcome] += 1
+			secondRecord[secondOutcome] += 1
+			secondRecord["points"] += secondPoints
 		} else {
 			secondRecord = make(record)
 			secondRecord["matches"] = 1
-			secondRecord[oppositeOutcome] = 1
+			secondRecord[secondOutcome] = 1
+			secondRecord["points"] = secondPoints
 		}
-
-		// if val, ok := firstRecord[outcome]; ok {
-		// 	firstRecord[outcome] = val + 1
-		// } else {
-		// 	firstRecord[outcome] = 1
-		// }
 
 		records[firstTeam] = firstRecord
 		records[secondTeam] = secondRecord
 	}
-	fmt.Println("records", records)
 
 	return records
 }
 
 func formatTable(r map[string]record) string {
-	// create map from string
-	fmt.Println(r)
-	return ""
+	toSort := []formattedRecord{}
+	for k, v := range r {
+		team := formattedRecord{k, v["matches"], v["win"], v["draw"], v["loss"], v["points"]}
+		toSort = append(toSort, team)
+	}
+
+	sort.SliceStable(toSort, func(i, j int) bool {
+		return int(toSort[i].points) > int(toSort[j].points)
+	})
+
+	teams := []string{fmt.Sprintf("%-30s | %2s | %2s | %2s | %2s | %2s", "Team", "MP", "W", "D", "L", "P")}
+	for _, v := range toSort {
+		team := fmt.Sprintf("%-30s | %2d | %2d | %2d | %2d | %2d", v.name, v.matches, v.win, v.draw, v.loss, v.points)
+		teams = append(teams, team)
+	}
+	teams = append(teams, "\n")
+
+	// Join slices
+	return strings.Join(teams, "\n")
 }
 
 // Tally does the tallying
@@ -112,7 +141,9 @@ func Tally(reader io.Reader, writer io.Writer) error {
 	records := getRecords(s)
 	output := formatTable(records)
 
-	fmt.Println(records)
-	fmt.Println(output)
+	// fmt.Println(records)
+	// fmt.Println(output)
+	bytes, err := convertToWrite(output)
+	writer.Write(bytes)
 	return nil
 }
