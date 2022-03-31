@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-type formattedRecord struct {
+type recordSlice struct {
 	name    string
 	matches int
 	win     int
@@ -60,21 +60,18 @@ func convertToWrite(s string) ([]byte, error) {
 }
 
 func updateRecords(records map[string]record, team string, outcome string) {
-	var record record
+	record := records[team]
 
-	points := pointsMap[outcome]
-
-	if val, ok := records[team]; ok {
-		record = val
-		record[outcome] += 1
-		record["matches"] += 1
-		record["points"] += points
-	} else {
+	if record == nil {
 		record = make(map[string]int)
-		record[outcome] = 1
-		record["matches"] = 1
-		record["points"] = points
+		record[outcome] = 0
+		record["matches"] = 0
+		record["points"] = 0
 	}
+
+	record[outcome] += 1
+	record["matches"] += 1
+	record["points"] += pointsMap[outcome]
 
 	records[team] = record
 }
@@ -88,7 +85,6 @@ func getRecords(s string) (map[string]record, error) {
 		}
 
 		r := strings.Split(game, ";")
-
 		if len(r) != 3 {
 			return nil, errors.New("Game should have two teams and an outcome")
 		}
@@ -110,15 +106,15 @@ func getRecords(s string) (map[string]record, error) {
 }
 
 func formatTable(r map[string]record) string {
-	toSort := []formattedRecord{}
+	toSort := []recordSlice{}
 	for k, v := range r {
-		team := formattedRecord{k, v["matches"], v["win"], v["draw"], v["loss"], v["points"]}
+		team := recordSlice{k, v["matches"], v["win"], v["draw"], v["loss"], v["points"]}
 		toSort = append(toSort, team)
 	}
 
 	sort.SliceStable(toSort, func(i, j int) bool {
-		firstPoints := int(toSort[i].points)
-		secondPoints := int(toSort[j].points)
+		firstPoints := toSort[i].points
+		secondPoints := toSort[j].points
 
 		if firstPoints == secondPoints {
 			return toSort[i].name < toSort[j].name
