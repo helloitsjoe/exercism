@@ -20,10 +20,18 @@ type formattedRecord struct {
 
 type record = map[string]int
 
-var validOutcomes = map[string]bool{
-	"win":  true,
-	"loss": true,
-	"draw": true,
+var validOutcomes = map[string]bool{"win": true, "loss": true, "draw": true}
+
+var pointsMap = map[string]int{
+	"win":  3,
+	"draw": 1,
+	"loss": 0,
+}
+
+var outcomesMap = map[string]string{
+	"win":  "loss",
+	"loss": "win",
+	"draw": "draw",
 }
 
 func parseReader(reader io.Reader) (string, error) {
@@ -34,9 +42,9 @@ func parseReader(reader io.Reader) (string, error) {
 		if err != nil {
 			if err == io.EOF {
 				break
-			} else {
-				return "", err
 			}
+
+			return "", err
 		}
 		s += string(b[:n])
 	}
@@ -51,12 +59,31 @@ func convertToWrite(s string) ([]byte, error) {
 	return b, nil
 }
 
+func updateRecords(records map[string]record, team string, outcome string) {
+	var record record
+
+	points := pointsMap[outcome]
+
+	if val, ok := records[team]; ok {
+		record = val
+		record[outcome] += 1
+		record["matches"] += 1
+		record["points"] += points
+	} else {
+		record = make(map[string]int)
+		record[outcome] = 1
+		record["matches"] = 1
+		record["points"] = points
+	}
+
+	records[team] = record
+}
+
 func getRecords(s string) (map[string]record, error) {
-	games := strings.Split(s, "\n")
 	records := make(map[string]record)
 
-	for _, game := range games {
-		if game == "" || game == " " || game[0] == '#' {
+	for _, game := range strings.Split(s, "\n") {
+		if strings.TrimSpace(game) == "" || game[0] == '#' {
 			continue
 		}
 
@@ -69,57 +96,14 @@ func getRecords(s string) (map[string]record, error) {
 		firstTeam := r[0]
 		secondTeam := r[1]
 		firstOutcome := r[2]
+		secondOutcome := outcomesMap[firstOutcome]
 
-		if _, ok := validOutcomes[firstOutcome]; !ok {
+		if !validOutcomes[firstOutcome] || !validOutcomes[secondOutcome] {
 			return nil, errors.New("Unrecognized outcome")
 		}
 
-		var secondOutcome string
-		var firstPoints int
-		var secondPoints int
-
-		if firstOutcome == "win" {
-			firstPoints = 3
-			secondPoints = 0
-			secondOutcome = "loss"
-		} else if firstOutcome == "loss" {
-			firstPoints = 0
-			secondPoints = 3
-			secondOutcome = "win"
-		} else {
-			firstPoints = 1
-			secondPoints = 1
-			secondOutcome = "draw"
-		}
-
-		var firstRecord record
-		if val, ok := records[firstTeam]; ok {
-			firstRecord = val
-			firstRecord["matches"] += 1
-			firstRecord[firstOutcome] += 1
-			firstRecord["points"] += firstPoints
-		} else {
-			firstRecord = make(record)
-			firstRecord["matches"] = 1
-			firstRecord[firstOutcome] = 1
-			firstRecord["points"] = firstPoints
-		}
-
-		var secondRecord record
-		if val, ok := records[secondTeam]; ok {
-			secondRecord = val
-			secondRecord["matches"] += 1
-			secondRecord[secondOutcome] += 1
-			secondRecord["points"] += secondPoints
-		} else {
-			secondRecord = make(record)
-			secondRecord["matches"] = 1
-			secondRecord[secondOutcome] = 1
-			secondRecord["points"] = secondPoints
-		}
-
-		records[firstTeam] = firstRecord
-		records[secondTeam] = secondRecord
+		updateRecords(records, firstTeam, firstOutcome)
+		updateRecords(records, secondTeam, secondOutcome)
 	}
 
 	return records, nil
@@ -152,7 +136,8 @@ func formatTable(r map[string]record) string {
 	return strings.Join(teams, "")
 }
 
-// Tally does the tallying
+// Tally takes unformatted matches from a reader, formats them into a table,
+// and writes them out to a writer
 func Tally(reader io.Reader, writer io.Writer) error {
 	s, err := parseReader(reader)
 	if err != nil {
@@ -160,15 +145,13 @@ func Tally(reader io.Reader, writer io.Writer) error {
 	}
 
 	records, err := getRecords(s)
-
 	if err != nil {
 		return err
 	}
 
 	output := formatTable(records)
-	fmt.Println("output:", output)
-	bytes, err := convertToWrite(output)
 
+	bytes, err := convertToWrite(output)
 	if err != nil {
 		return err
 	}
