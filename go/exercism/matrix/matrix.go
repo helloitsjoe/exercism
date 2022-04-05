@@ -1,18 +1,18 @@
+// Package matrix manipulates rows an columns of a matrix
 package matrix
 
 import (
 	"errors"
-	"fmt"
 	"strconv"
 	"strings"
 )
 
-// Define the Matrix type here.
 type Matrix struct {
 	rows [][]int
 	cols [][]int
 }
 
+// New creates a new matrix from a string
 func New(s string) (*Matrix, error) {
 	var rows = [][]int{}
 	var cols = [][]int{}
@@ -35,8 +35,6 @@ func New(s string) (*Matrix, error) {
 		rows = append(rows, row)
 	}
 
-	fmt.Println("rows", rows)
-
 	for i := 0; i < len(rows[0]); i++ {
 		col := []int{}
 		for j := 0; j < len(rows); j++ {
@@ -45,12 +43,10 @@ func New(s string) (*Matrix, error) {
 		cols = append(cols, col)
 	}
 
-	fmt.Println("cols", cols)
-
 	return &Matrix{rows, cols}, nil
 }
 
-// Cols and Rows must return the results without affecting the matrix.
+// Cols returns a copy of the column data
 func (m *Matrix) Cols() [][]int {
 	colsCopy := [][]int{}
 	for _, col := range m.cols {
@@ -63,6 +59,7 @@ func (m *Matrix) Cols() [][]int {
 	return colsCopy
 }
 
+// Rows returns a copy of the row data
 func (m *Matrix) Rows() [][]int {
 	rowsCopy := [][]int{}
 	for _, row := range m.rows {
@@ -75,6 +72,7 @@ func (m *Matrix) Rows() [][]int {
 	return rowsCopy
 }
 
+// Set sets a number in the matrix
 func (m *Matrix) Set(row, col, val int) bool {
 	if row < 0 || row >= len(m.rows) || col < 0 || col >= len(m.cols) {
 		return false
