@@ -1,6 +1,7 @@
 node_modules
 dist
 *.swp
+yarn-error.log
 
 
 # Added by cargo
