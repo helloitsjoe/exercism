@@ -17,10 +17,11 @@ func IsPangram(input string) bool {
 			continue
 		}
 		counter++
+		letters[letter] = true
+
 		if counter == 26 {
 			return true
 		}
-		letters[letter] = true
 	}
 	return false
 }
