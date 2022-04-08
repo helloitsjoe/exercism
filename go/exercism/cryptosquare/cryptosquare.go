@@ -8,7 +8,7 @@ import (
 	"unicode"
 )
 
-func filterAlphabetic(s string) []string {
+func filterAlphanumeric(s string) []string {
 	// Remove spaces and punctuation
 	letters := make([]string, 0, len(s))
 	for _, char := range s {
@@ -58,7 +58,7 @@ func getBlock(s []string) [][]string {
 		inner := make([]string, 0, blockLength)
 		for j := 0; j < rows; j++ {
 			// What index to take here?
-			inner = append(inner, s[i+j+(blockLength*i)])
+			inner = append(inner, s[j+(blockLength*i)])
 		}
 		outer = append(outer, inner)
 	}
@@ -70,11 +70,8 @@ func getBlock(s []string) [][]string {
 func swapColsAndRows(m [][]string) string {
 	str := ""
 	counter := 0
-	// [[s p] [l u] [n k]]
 
-	// swapped := make([][]string, 0)
 	for i := range m[0] {
-		// swapped = append(swapped, make([]string, len(m)))
 		for j := range m {
 			fmt.Println("str", str)
 			str += m[j][i]
@@ -83,20 +80,10 @@ func swapColsAndRows(m [][]string) string {
 				str += " "
 				counter = 0
 			}
-			// fmt.Println("swapped", swapped)
-			// swapped[i][j] = m[j][i]
-
 		}
 	}
 	fmt.Println("str", str)
 	return strings.TrimSpace(str)
-
-	// out := make([]string, 0, len(m[0]))
-	// for _, row := range swapped {
-	// 	out = append(out, strings.Join(row, ""))
-	// }
-
-	// return strings.Join(out, " ")
 }
 
 // Encode does the encoding
@@ -105,7 +92,7 @@ func Encode(pt string) string {
 	// single sting separated by spaces
 	// pad ends with single space if necessary
 	// lowercase
-	compact := filterAlphabetic(strings.ToLower(pt))
+	compact := filterAlphanumeric(strings.ToLower(pt))
 	block := getBlock(compact)
 	swapped := swapColsAndRows(block)
 
