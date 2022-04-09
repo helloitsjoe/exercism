@@ -9,39 +9,43 @@ import (
 )
 
 func filterAlphanumeric(s string) []string {
-	// Remove spaces and punctuation
 	letters := make([]string, 0, len(s))
+
 	for _, char := range s {
 		if unicode.IsLetter(char) || unicode.IsNumber(char) {
 			letters = append(letters, string(char))
 		}
 	}
-	fmt.Println("letters", letters)
+
 	return letters
 }
 
-func getBlockLength(s []string) (int, int) {
-	// r * c > len(pt)
+func getColsRows(s []string) (int, int) {
+	// Rules about rows:
+	// r * c > len(s)
 	// c > r
 	// c - r <= 1
+
 	sqrt := math.Sqrt(float64(len(s)))
+	ceil := math.Ceil(sqrt)
+	floor := math.Floor(sqrt)
+	round := math.Round(sqrt)
 
-	r := math.Floor(sqrt)
-	c := math.Floor(sqrt)
+	r := floor
+	c := floor
 
-	if math.Round(sqrt) == sqrt {
-		fmt.Println("equal:", math.Round(sqrt), sqrt)
+	if round == sqrt {
+		fmt.Println("equal:", round, sqrt)
 		return int(sqrt), int(sqrt)
 	}
-	// if < 0.5, col += 1
-	// if > 0.5, both += 1
-	if math.Round(sqrt) == math.Floor(sqrt) {
-		fmt.Println("< 0.5:", math.Round(sqrt), math.Floor(sqrt))
+
+	if round == floor {
+		fmt.Println("< 0.5:", round, floor)
 		r++
 	}
 
-	if math.Round(sqrt) == math.Ceil(sqrt) {
-		fmt.Println("> 0.5:", math.Round(sqrt), math.Ceil(sqrt))
+	if round == ceil {
+		fmt.Println("> 0.5:", round, ceil)
 		c++
 		r++
 	}
@@ -50,20 +54,27 @@ func getBlockLength(s []string) (int, int) {
 }
 
 func getBlock(s []string) [][]string {
-	blockLength, rows := getBlockLength(s)
-	fmt.Println("blockLength:", blockLength)
+	cols, rows := getColsRows(s)
+
+	// 12345678 causes slice bounds out of range error, add capacity
+	// I'm not sure exactly why this happens...
+	if cap(s) < cols*rows {
+		s = append(s, "")
+	}
 
 	outer := make([][]string, 0, rows)
-	for i := 0; i < blockLength; i++ {
-		inner := make([]string, 0, blockLength)
-		for j := 0; j < rows; j++ {
-			// What index to take here?
-			inner = append(inner, s[j+(blockLength*i)])
+	for i := 0; i < cols; i++ {
+		inner := s[i*rows : i*rows+rows]
+
+		for i := range inner {
+			if inner[i] == "" {
+				fmt.Println("padding extra space")
+				inner[i] = " "
+			}
 		}
 		outer = append(outer, inner)
 	}
 
-	fmt.Println("outer", outer)
 	return outer
 }
 
@@ -73,7 +84,6 @@ func swapColsAndRows(m [][]string) string {
 
 	for i := range m[0] {
 		for j := range m {
-			fmt.Println("str", str)
 			str += m[j][i]
 			counter++
 			if counter == len(m) {
@@ -82,17 +92,17 @@ func swapColsAndRows(m [][]string) string {
 			}
 		}
 	}
-	fmt.Println("str", str)
-	return strings.TrimSpace(str)
+	return str[:len(str)-1]
 }
 
 // Encode does the encoding
 func Encode(pt string) string {
-	// return columns swapped with rows
-	// single sting separated by spaces
-	// pad ends with single space if necessary
-	// lowercase
 	compact := filterAlphanumeric(strings.ToLower(pt))
+
+	if len(compact) == 0 {
+		return ""
+	}
+
 	block := getBlock(compact)
 	swapped := swapColsAndRows(block)
 
