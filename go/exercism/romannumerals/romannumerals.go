@@ -18,20 +18,18 @@ func ToRomanNumeral(input int) (string, error) {
 	output := ""
 	valIdx := 0
 
-	rounds := 0
-
 	for input > 0 {
 		denominator := values[valIdx]
 
-		if input > 89 && input < 100 {
-			output += "XC"
-			input -= 90
-		} else if input > 899 && input < 1000 {
+		if input > 899 && input < 1000 {
 			output += "CM"
 			input -= 900
+		} else if input > 89 && input < 100 {
+			output += "XC"
+			input -= 90
 		} else if input == 9 {
 			output += "IX"
-			input = 0
+			input -= 9
 		}
 
 		repeat := input / denominator
@@ -46,11 +44,6 @@ func ToRomanNumeral(input int) (string, error) {
 		input = remainder
 
 		valIdx++
-		rounds++
-
-		if rounds == 100 {
-			return "", errors.New("Too many rounds")
-		}
 	}
 
 	return output, nil
