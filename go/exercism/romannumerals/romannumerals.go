@@ -3,9 +3,7 @@ package romannumerals
 
 import (
 	"errors"
-	"fmt"
 	"strings"
-	// "math"
 )
 
 var values = []int{1000, 500, 100, 50, 10, 5, 1}
@@ -13,11 +11,6 @@ var numerals = []string{"M", "D", "C", "L", "X", "V", "I"}
 
 // ToRomanNumeral takes in an int input and returns the Roman string.
 func ToRomanNumeral(input int) (string, error) {
-	// Start with largest denomination (M)
-	// divide to get the number of repeating values
-	// modulo to get the next denomination
-	// Exception for denomination - 1
-
 	if input <= 0 || input > 3000 {
 		return "", errors.New("Input must be a positive integer")
 	}
@@ -28,7 +21,6 @@ func ToRomanNumeral(input int) (string, error) {
 	rounds := 0
 
 	for input > 0 {
-		fmt.Println(input)
 		denominator := values[valIdx]
 
 		if input > 89 && input < 100 {
@@ -37,22 +29,16 @@ func ToRomanNumeral(input int) (string, error) {
 		} else if input > 899 && input < 1000 {
 			output += "CM"
 			input -= 900
+		} else if input == 9 {
+			output += "IX"
+			input = 0
 		}
 
 		repeat := input / denominator
 		remainder := input % denominator
 
-		if input == 93 {
-			fmt.Println("repeat", repeat)
-			fmt.Println("remainder", remainder)
-			fmt.Println(output)
-		}
-
 		if repeat == 4 {
 			output += numerals[valIdx] + numerals[valIdx-1]
-		} else if input == 9 {
-			output += "IX"
-			remainder = 0
 		} else {
 			output += strings.Repeat(numerals[valIdx], repeat)
 		}
