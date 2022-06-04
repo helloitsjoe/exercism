@@ -25,11 +25,8 @@ func Use(opener ResourceOpener, input string) (returnError error) {
 			if ok {
 				r.Defrob(frobErr.defrobTag)
 				returnError = frobErr.err
-			}
-
-			otherError, ok := rec.(error)
-			if ok {
-				returnError = otherError
+			} else {
+				returnError = rec.(error)
 			}
 
 			r.Close()
