@@ -1,7 +1,7 @@
 package main
 
-import "exercism/twofer"
+import "exercism/errata"
 
 func main() {
-	twofer.ShareWith()
+	errata.Use()
 }
