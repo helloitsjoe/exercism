@@ -1,7 +1,5 @@
 package linkedlist
 
-// Define List and Node types here.
-// Note: The tests expect Node type to include an exported field with name Value to pass.
 type List struct {
 	head *Node
 	tail *Node
@@ -14,6 +12,7 @@ type Node struct {
 
 func NewList(args ...interface{}) *List {
 	l := &List{}
+
 	for i, arg := range args {
 		n := &Node{Value: arg}
 		if i == 0 {
@@ -52,11 +51,11 @@ func (l *List) Unshift(v interface{}) {
 
 	prevHead.prev = newHead
 	newHead.next = prevHead
+
 	l.head = newHead
 }
 
 func (l *List) Push(v interface{}) {
-	// Add to tail
 	newTail := &Node{Value: v}
 
 	if l.tail == nil {
