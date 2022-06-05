@@ -16,37 +16,29 @@ type Node struct {
 
 func NewList(args ...interface{}) *List {
 	l := &List{}
-	for i, arg := range args {
+	for _, arg := range args {
 		n := &Node{Value: arg}
-		if i == 0 {
-			l.head = n
-			l.tail = n
-		} else {
-			prevTail := l.tail
-			newTail := n
-			prevTail.next = newTail
-			newTail.prev = prevTail
-			l.tail = newTail
-		}
+		prevTail := l.tail
+		newTail := n
+		prevTail.next = newTail
+		newTail.prev = prevTail
+		l.tail = newTail
 	}
 
 	return l
 }
 
 func (n *Node) Next() *Node {
-	// Need to check for nil?
 	return n.next
 }
 
 func (n *Node) Prev() *Node {
-	// Need to check for nil?
 	return n.prev
 }
 
 func (l *List) Unshift(v interface{}) {
 	newHead := &Node{Value: v}
 
-	// Add to head
 	if l.head == nil {
 		l.head = newHead
 		l.tail = newHead
@@ -78,7 +70,6 @@ func (l *List) Push(v interface{}) {
 }
 
 func (l *List) Shift() (interface{}, error) {
-	// Remove from head
 	if l.head == nil {
 		// TODO: Return error?
 		return nil, nil
@@ -95,7 +86,7 @@ func (l *List) Shift() (interface{}, error) {
 
 	newHead := prevHead.next
 	newHead.prev = nil
-	fmt.Println("newHead", newHead)
+
 	l.head = newHead
 
 	return prevHead.Value, nil
