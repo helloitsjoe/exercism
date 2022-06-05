@@ -102,7 +102,6 @@ func (l *List) Shift() (interface{}, error) {
 }
 
 func (l *List) Pop() (interface{}, error) {
-	// Remove from tail
 	if l.tail == nil {
 		// TODO: Return error?
 		return nil, nil
@@ -124,7 +123,33 @@ func (l *List) Pop() (interface{}, error) {
 }
 
 func (l *List) Reverse() {
-	panic("Please implement the Reverse function")
+	prevHead := l.head
+	prevTail := l.tail
+
+	swap(l.tail)
+
+	l.head = prevTail
+	l.tail = prevHead
+}
+
+func swap(node *Node) {
+	if node == nil {
+		return
+	}
+
+	tempPrev := node.prev
+	tempNext := node.next
+
+	if tempPrev != nil {
+		node.prev = tempNext
+		node.next = tempPrev
+
+	} else {
+		node.prev = tempNext
+		node.next = nil
+	}
+
+	swap(node.next)
 }
 
 func (l *List) First() *Node {
