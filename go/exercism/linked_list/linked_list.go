@@ -1,7 +1,5 @@
 package linkedlist
 
-import "fmt"
-
 // Define List and Node types here.
 // Note: The tests expect Node type to include an exported field with name Value to pass.
 type List struct {
@@ -16,13 +14,18 @@ type Node struct {
 
 func NewList(args ...interface{}) *List {
 	l := &List{}
-	for _, arg := range args {
+	for i, arg := range args {
 		n := &Node{Value: arg}
-		prevTail := l.tail
-		newTail := n
-		prevTail.next = newTail
-		newTail.prev = prevTail
-		l.tail = newTail
+		if i == 0 {
+			l.head = n
+			l.tail = n
+		} else {
+			prevTail := l.tail
+			newTail := n
+			prevTail.next = newTail
+			newTail.prev = prevTail
+			l.tail = newTail
+		}
 	}
 
 	return l
