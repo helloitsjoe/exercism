@@ -85,9 +85,10 @@ func (l *List) Shift() (interface{}, error) {
 	}
 
 	if l.head.next == nil {
+		val := l.head.Value
 		l.head = nil
 		l.tail = nil
-		return l.head.Value, nil
+		return val, nil
 	}
 
 	prevHead := l.head
@@ -108,9 +109,10 @@ func (l *List) Pop() (interface{}, error) {
 	}
 
 	if l.tail.prev == nil {
+		val := l.tail.Value
 		l.head = nil
 		l.tail = nil
-		return l.tail.Value, nil
+		return val, nil
 	}
 
 	prevTail := l.tail

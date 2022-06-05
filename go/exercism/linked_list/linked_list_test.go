@@ -199,15 +199,15 @@ func TestNew(t *testing.T) {
 	}
 }
 
-// func TestReverse(t *testing.T) {
-// 	for _, tc := range reverseTestCases {
-// 		t.Run(tc.name, func(t *testing.T) {
-// 			actual := NewList(tc.in...)
-// 			actual.Reverse()
-// 			checkDoublyLinkedList(t, actual, tc.expected)
-// 		})
-// 	}
-// }
+func TestReverse(t *testing.T) {
+	for _, tc := range reverseTestCases {
+		t.Run(tc.name, func(t *testing.T) {
+			actual := NewList(tc.in...)
+			actual.Reverse()
+			checkDoublyLinkedList(t, actual, tc.expected)
+		})
+	}
+}
 func TestPushPop(t *testing.T) {
 	for _, tc := range pushPopTestCases {
 		t.Run(tc.name, func(t *testing.T) {
