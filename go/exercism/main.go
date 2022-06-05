@@ -1,7 +1,7 @@
 package main
 
-import "exercism/errata"
+import "exercism/linkedlist"
 
 func main() {
-	errata.Use()
+	linkedlist.Use()
 }
