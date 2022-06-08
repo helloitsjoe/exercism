@@ -73,7 +73,6 @@ func (l *List) Push(v interface{}) {
 
 func (l *List) Shift() (interface{}, error) {
 	if l.head == nil {
-		// TODO: Return error?
 		return nil, nil
 	}
 
@@ -96,7 +95,6 @@ func (l *List) Shift() (interface{}, error) {
 
 func (l *List) Pop() (interface{}, error) {
 	if l.tail == nil {
-		// TODO: Return error?
 		return nil, nil
 	}
 
