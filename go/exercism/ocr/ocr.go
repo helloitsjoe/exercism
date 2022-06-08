@@ -1,9 +1,9 @@
 package ocr
 
-import (
+import "strings"
+
 // "fmt"
 // "strings"
-)
 
 func recognizeDigit(input string) string {
 	const zero = `
@@ -89,6 +89,12 @@ func recognizeDigit(input string) string {
 
 func Recognize(input string) []string {
 	// TODO: Split string into 3x4 digits
-	digit := recognizeDigit(input)
-	return []string{digit}
+	digits := ""
+
+	for _, line := range strings.Split(input, "\n") {
+		digit := recognizeDigit(line)
+		digits += digit
+	}
+
+	return []string{digits}
 }
