@@ -11,7 +11,6 @@ func recognizeDigit(input string) string {
 | |
 |_|
    `
-
 	const one = `
    
   |
@@ -90,30 +89,30 @@ func recognizeDigit(input string) string {
 func Recognize(input string) []string {
 	// TODO: Split string into 3x4 digits
 	split := strings.Split(input, "\n")
-	digits := make([][]string, len(split))
+	digits := make([]string, 0)
 
-	for i, line := range split {
-		digit := make([]string, 16)
-		for j := 0; j < len(line); j += 1 {
-			digit[j] = line[i : i+3]
+	// TODO: Handle malformed
+
+	for i := 0; i < len(split[1])/3; i += 1 {
+		digit := ""
+		for _, line := range split {
+			foo := i * 3
+			if foo+3 <= len(line) {
+				digit += "\n" + line[foo:foo+3]
+			}
 		}
-		digits[i] = digit
+
+		if digit != "" {
+			digits = append(digits, digit)
+		}
 	}
 
-	// foo := ""
-	// for _, line := range digits {
-	// 	foo += line + "\n"
-	// }
-
 	fmt.Println("digits", digits)
-	// fmt.Println("foo", foo)
 
 	output := ""
 
-	for _, matrix := range digits {
-		for _, s := range matrix {
-			output += recognizeDigit(string(s))
-		}
+	for _, digit := range digits {
+		output += recognizeDigit(digit)
 	}
 
 	return []string{output}
