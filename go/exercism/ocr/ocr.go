@@ -1,9 +1,6 @@
 package ocr
 
-import (
-	"fmt"
-	"strings"
-)
+import "strings"
 
 func recognizeDigit(input string) string {
 	const zero = `
@@ -86,24 +83,27 @@ func recognizeDigit(input string) string {
 	return val
 }
 
-func combineLines(input string) string {
-	split := strings.Split(input, "\n")
-	if len(split) == 5 {
-		return input
+func combineLines(input string) []string {
+	// Slice off first newline
+	split := strings.Split(input, "\n")[1:]
+	if len(split) == 4 {
+		return []string{input}
 	}
 
-	// lines := make([][]string, 0)
-	// for i := range split {
-	// 		lines = append(lines, split[i : i+5])
-	// }
-	return input
+	output := []string{}
+	for i := 0; i < len(split)/4; i += 1 {
+		j := i * 4
+		if j+4 <= len(split) {
+			single := strings.Join(split[j:j+4], "\n")
+			output = append(output, single)
+		}
+	}
+	return output
 }
 
 func getDigits(input string) []string {
 	split := strings.Split(input, "\n")
-	digits := make([]string, 0)
-
-	// TODO: Handle malformed
+	digits := []string{}
 
 	for i := 0; i < len(split[1])/3; i += 1 {
 		digit := ""
@@ -123,16 +123,14 @@ func getDigits(input string) []string {
 }
 
 func Recognize(input string) []string {
-	// TODO: Split string into 3x4 digits
-	singleLine := combineLines(input)
-	digits := getDigits(singleLine)
+	singleLines := combineLines(input)
+	output := make([]string, len(singleLines))
 
-	fmt.Println("digits", digits)
-
-	output := ""
-	for _, digit := range digits {
-		output += recognizeDigit(digit)
+	for i, line := range singleLines {
+		for _, digit := range getDigits(line) {
+			output[i] += recognizeDigit(digit)
+		}
 	}
 
-	return []string{output}
+	return output
 }
