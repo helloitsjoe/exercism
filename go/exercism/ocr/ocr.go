@@ -86,8 +86,20 @@ func recognizeDigit(input string) string {
 	return val
 }
 
-func Recognize(input string) []string {
-	// TODO: Split string into 3x4 digits
+func combineLines(input string) string {
+	split := strings.Split(input, "\n")
+	if len(split) == 5 {
+		return input
+	}
+
+	// lines := make([][]string, 0)
+	// for i := range split {
+	// 		lines = append(lines, split[i : i+5])
+	// }
+	return input
+}
+
+func getDigits(input string) []string {
 	split := strings.Split(input, "\n")
 	digits := make([]string, 0)
 
@@ -96,9 +108,9 @@ func Recognize(input string) []string {
 	for i := 0; i < len(split[1])/3; i += 1 {
 		digit := ""
 		for _, line := range split {
-			foo := i * 3
-			if foo+3 <= len(line) {
-				digit += "\n" + line[foo:foo+3]
+			j := i * 3
+			if j+3 <= len(line) {
+				digit += "\n" + line[j:j+3]
 			}
 		}
 
@@ -107,10 +119,17 @@ func Recognize(input string) []string {
 		}
 	}
 
+	return digits
+}
+
+func Recognize(input string) []string {
+	// TODO: Split string into 3x4 digits
+	singleLine := combineLines(input)
+	digits := getDigits(singleLine)
+
 	fmt.Println("digits", digits)
 
 	output := ""
-
 	for _, digit := range digits {
 		output += recognizeDigit(digit)
 	}
