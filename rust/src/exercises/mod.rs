@@ -1,4 +1,5 @@
-pub mod acronym;
+// pub mod acronym;
+pub mod allergies;
 // pub mod anagrams;
 // pub mod armstrong_number;
 // pub mod buffer;
