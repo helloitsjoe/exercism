@@ -2,43 +2,16 @@ pub struct Allergies {
     score: u32,
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Copy, Clone)]
 pub enum Allergen {
-    Eggs,
-    Peanuts,
-    Shellfish,
-    Strawberries,
-    Tomatoes,
-    Chocolate,
-    Pollen,
-    Cats,
-}
-
-fn get_value(allergen: &Allergen) -> u32 {
-    match allergen {
-        Allergen::Eggs => 1,
-        Allergen::Peanuts => 2,
-        Allergen::Shellfish => 4,
-        Allergen::Strawberries => 8,
-        Allergen::Tomatoes => 16,
-        Allergen::Chocolate => 32,
-        Allergen::Pollen => 64,
-        Allergen::Cats => 128,
-    }
-}
-
-fn get_allergen(factor: u32) -> Allergen {
-    match factor {
-        1 => Allergen::Eggs,
-        2 => Allergen::Peanuts,
-        4 => Allergen::Shellfish,
-        8 => Allergen::Strawberries,
-        16 => Allergen::Tomatoes,
-        32 => Allergen::Chocolate,
-        64 => Allergen::Pollen,
-        128 => Allergen::Cats,
-        _ => panic!("oh no!"),
-    }
+    Eggs = 1,
+    Peanuts = 2,
+    Shellfish = 4,
+    Strawberries = 8,
+    Tomatoes = 16,
+    Chocolate = 32,
+    Pollen = 64,
+    Cats = 128,
 }
 
 impl Allergies {
@@ -51,25 +24,26 @@ impl Allergies {
         // 00001000 & 11111111
         // println!("{:#010b}", self.score & 255);
         // println!("{:#010b}", get_value(allergen) & 255);
-        if self.score & get_value(allergen) == get_value(allergen) & 255 {
-            return true;
-        }
-
-        false
+        let allergen = *allergen as u32;
+        self.score & allergen == allergen & 255
     }
 
     pub fn allergies(&self) -> Vec<Allergen> {
-        let mut factor = 1;
-        let mut allergens = vec![];
+        let all_ergens: Vec<Allergen> = vec![
+            Allergen::Eggs,
+            Allergen::Peanuts,
+            Allergen::Shellfish,
+            Allergen::Strawberries,
+            Allergen::Tomatoes,
+            Allergen::Chocolate,
+            Allergen::Pollen,
+            Allergen::Cats,
+        ];
 
-        for i in 0..8 {
-            if self.score >> 1 == 1 {
-                allergens.push(get_allergen(factor));
-            }
-            factor *= 2;
-        }
-
-        allergens
+        all_ergens
+            .into_iter()
+            .filter(|a| self.is_allergic_to(a))
+            .collect()
     }
 }
 
@@ -118,35 +92,30 @@ fn allergic_to_just_eggs() {
     compare_allergy_vectors(expected, &allergies);
 }
 #[test]
-#[ignore]
 fn allergic_to_just_peanuts() {
     let expected = &[Allergen::Peanuts];
     let allergies = Allergies::new(2).allergies();
     compare_allergy_vectors(expected, &allergies);
 }
 #[test]
-#[ignore]
 fn allergic_to_just_strawberries() {
     let expected = &[Allergen::Strawberries];
     let allergies = Allergies::new(8).allergies();
     compare_allergy_vectors(expected, &allergies);
 }
 #[test]
-#[ignore]
 fn allergic_to_eggs_and_peanuts() {
     let expected = &[Allergen::Eggs, Allergen::Peanuts];
     let allergies = Allergies::new(3).allergies();
     compare_allergy_vectors(expected, &allergies);
 }
 #[test]
-#[ignore]
 fn allergic_to_eggs_and_shellfish() {
     let expected = &[Allergen::Eggs, Allergen::Shellfish];
     let allergies = Allergies::new(5).allergies();
     compare_allergy_vectors(expected, &allergies);
 }
 #[test]
-#[ignore]
 fn allergic_to_many_things() {
     let expected = &[
         Allergen::Strawberries,
@@ -159,7 +128,6 @@ fn allergic_to_many_things() {
     compare_allergy_vectors(expected, &allergies);
 }
 #[test]
-#[ignore]
 fn allergic_to_everything() {
     let expected = &[
         Allergen::Eggs,
@@ -175,7 +143,6 @@ fn allergic_to_everything() {
     compare_allergy_vectors(expected, &allergies);
 }
 #[test]
-#[ignore]
 fn scores_over_255_do_not_trigger_false_positives() {
     let expected = &[
         Allergen::Eggs,
